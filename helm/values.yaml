@@ -6,7 +6,7 @@ image:
   tag: "latest"
 
 serviceAccount:
-  name: kafka-producer
+  name: link-shortener-user-service
 
 spring:
   profiles:
