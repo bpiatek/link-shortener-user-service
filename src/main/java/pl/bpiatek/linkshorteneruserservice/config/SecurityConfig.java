@@ -14,7 +14,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import static org.springframework.security.config.http.SessionCreationPolicy.*;
 
 @Configuration
-//@EnableWebSecurity
+@EnableWebSecurity
 class SecurityConfig {
 
     @Bean
@@ -33,7 +33,7 @@ class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/register", "/api/auth/login").permitAll()
+                        .requestMatchers("auth/register", "auth/login").permitAll()
                         .anyRequest().authenticated()
                 );
         return http.build();
