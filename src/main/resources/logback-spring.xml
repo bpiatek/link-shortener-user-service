@@ -1,21 +1,39 @@
-<!-- In: src/main/resources/logback-spring.xml -->
 <configuration>
-    <!-- Include the standard Spring Boot base configuration -->
-    <include resource="org/springframework/boot/logging/logback/base.xml"/>
+    <!-- This variable is provided by Spring Boot's base.xml -->
+    <property name="CONSOLE_LOG_PATTERN"
+              value="%clr(%d{${LOG_DATEFORMAT_PATTERN:-yyyy-MM-dd'T'HH:mm:ss.SSS'Z'}})%clr(${LOG_LEVEL_PATTERN:-%5p}) %clr(${PID:- }){magenta} %clr(---){faint} %clr([%15.15t]){faint} %clr(%-40.40logger{39}){cyan} %clr(:){faint} %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}}"/>
 
-    <!-- Define a new Console Appender that uses the JSON encoder -->
+    <!-- Define a standard console appender (for local development if needed) -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>${CONSOLE_LOG_PATTERN}</pattern>
+            <charset>utf8</charset>
+        </encoder>
+    </appender>
+
+    <!-- Define our JSON console appender -->
     <appender name="jsonConsole" class="ch.qos.logback.core.ConsoleAppender">
         <encoder class="net.logstash.logback.encoder.LogstashEncoder">
-            <!-- You can customize the JSON fields here if you want -->
             <fieldNames>
                 <message>message</message>
-                <version>[ignore]</version> <!-- Don't include the logback version field -->
+                <version>[ignore]</version>
             </fieldNames>
         </encoder>
     </appender>
 
-    <!-- This tells the root logger to use our new JSON appender -->
-    <root level="INFO">
-        <appender-ref ref="jsonConsole"/>
-    </root>
+    <!-- Spring Profile for LOCAL development -->
+    <!-- When the 'local' profile is active, use the standard, human-readable console log -->
+    <springProfile name="local">
+        <root level="INFO">
+            <appender-ref ref="CONSOLE"/>
+        </root>
+    </springProfile>
+
+    <!-- Spring Profile for DEPLOYED environments (dev, prod, etc.) -->
+    <!-- When any profile OTHER THAN 'local' is active, use the JSON log -->
+    <springProfile name="!local">
+        <root level="INFO">
+            <appender-ref ref="jsonConsole"/>
+        </root>
+    </springProfile>
 </configuration>
