@@ -1,0 +1,57 @@
+name: Run Database Migration
+#TODO to be finished
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        type: choice
+        description: 'Environment to run migration against'
+        required: true
+        default: 'dev'
+        options:
+          - dev
+          - prod
+
+jobs:
+  run-migration:
+    name: Run Migration for ${{ github.event.inputs.environment }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Run Flyway Database Migration
+        # This step now dynamically sets the environment variables for the Docker command
+        # based on the 'environment' input from the workflow dispatch.
+        run: |
+          echo "Starting database migration for ${{ env.ENVIRONMENT }}..."
+          
+          if [ "${{ env.ENVIRONMENT }}" = "prod" ]; then
+            DB_URL="${{ secrets.DB_URL_PROD }}"
+            DB_USER="${{ secrets.DB_USERNAME_PROD }}"
+            DB_PASS="${{ secrets.DB_PASSWORD_PROD }}"
+          else
+            DB_URL="${{ secrets.DB_URL_DEV }}"
+            DB_USER="${{ secrets.DB_USERNAME_DEV }}"
+            DB_PASS="${{ secrets.DB_PASSWORD_DEV }}"
+          fi
+
+          if [ -z "$DB_URL" ] || [ -z "$DB_USER" ] || [ -z "$DB_PASS" ]; then
+            echo "::error::Database secrets for environment '${{ env.ENVIRONMENT }}' are not set in Gitea secrets."
+            exit 1
+          fi
+
+          docker run --rm \
+            -v ${{ gitea.workspace }}/src/main/resources/db/migration:/flyway/sql \
+            -e FLYWAY_URL="$DB_URL" \
+            -e FLYWAY_USER="$DB_USER" \
+            -e FLYWAY_PASSWORD="$DB_PASS" \
+            flyway/flyway:latest migrate
+        env:
+          ENVIRONMENT: ${{ github.event.inputs.environment }}
+
+      - name: Migration Finished
+        run: echo "✅ Database migration for ${{ env.ENVIRONMENT }} completed successfully."
+        env:
+          ENVIRONMENT: ${{ github.event.inputs.environment }}
