@@ -1,0 +1,21 @@
+<!-- In: src/main/resources/logback-spring.xml -->
+<configuration>
+    <!-- Include the standard Spring Boot base configuration -->
+    <include resource="org/springframework/boot/logging/logback/base.xml"/>
+
+    <!-- Define a new Console Appender that uses the JSON encoder -->
+    <appender name="jsonConsole" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+            <!-- You can customize the JSON fields here if you want -->
+            <fieldNames>
+                <message>message</message>
+                <version>[ignore]</version> <!-- Don't include the logback version field -->
+            </fieldNames>
+        </encoder>
+    </appender>
+
+    <!-- This tells the root logger to use our new JSON appender -->
+    <root level="INFO">
+        <appender-ref ref="jsonConsole"/>
+    </root>
+</configuration>
