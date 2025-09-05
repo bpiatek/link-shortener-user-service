@@ -3,6 +3,7 @@ package pl.bpiatek.linkshorteneruserservice.user;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import pl.bpiatek.linkshorteneruserservice.exception.UserAlreadyExistsException;
 
 import java.time.Clock;
 
@@ -23,7 +24,7 @@ class AuthService {
 
     void register(String email, String password) {
         if (userRepository.findByEmail(email).isPresent()) {
-            throw new IllegalStateException("User with email " + email + " already exists.");
+            throw new UserAlreadyExistsException("User with email " + email + " already exists.");
         }
 
         var passwordHash = passwordEncoder.encode(password);
