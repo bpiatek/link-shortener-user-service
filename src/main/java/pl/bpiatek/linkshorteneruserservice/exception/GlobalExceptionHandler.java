@@ -58,7 +58,7 @@ class GlobalExceptionHandler {
                 request.getRequestURI(),
                 null
         );
-        
+
         log.warn("User registration failed: {}", ex.getMessage());
 
         return new ResponseEntity<>(apiError, CONFLICT);

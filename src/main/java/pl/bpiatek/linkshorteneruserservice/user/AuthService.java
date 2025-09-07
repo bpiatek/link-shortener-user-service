@@ -24,7 +24,7 @@ class AuthService {
 
     void register(String email, String password) {
         if (userRepository.findByEmail(email).isPresent()) {
-            throw new UserAlreadyExistsException("User with email " + email + " already exists.");
+            throw new UserAlreadyExistsException(email);
         }
 
         var passwordHash = passwordEncoder.encode(password);
