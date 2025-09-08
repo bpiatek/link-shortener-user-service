@@ -22,12 +22,7 @@ class SecurityConfig {
     PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
-
-    @Bean
-    AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
-        return authenticationConfiguration.getAuthenticationManager();
-    }
-
+    
     @Bean
     SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
