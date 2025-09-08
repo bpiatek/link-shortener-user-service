@@ -37,7 +37,7 @@ class SecurityConfig {
         UserDetails user = User.builder()
                 .username("bpiatek")
                 .password(passwordEncoder().encode("dupa1234"))
-                .roles("ADMIN")
+                .roles("ADMIN", "USER")
                 .build();
         return new InMemoryUserDetailsManager(user);
     }
@@ -51,9 +51,8 @@ class SecurityConfig {
                         .requestMatchers(
                                 "/auth/register",
                                 "/auth/login",
-                                "/error",
-                                //TODO restrict it later
-                                "/actuator/**").permitAll()
+                                "/error").permitAll()
+                        .requestMatchers("/actuator/**").authenticated()
                         .anyRequest().permitAll()
                 )
                 .httpBasic(Customizer.withDefaults());
