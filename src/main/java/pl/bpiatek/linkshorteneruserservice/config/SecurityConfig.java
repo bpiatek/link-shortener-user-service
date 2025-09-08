@@ -38,7 +38,7 @@ class SecurityConfig {
                                 "/auth/register",
                                 "/auth/login",
                                 "/error").permitAll()
-                        .requestMatchers("/actuator/**").hasRole("ADMIN")
+                        .requestMatchers("/actuator/**").authenticated()
                         .anyRequest().authenticated()
                 );
 
