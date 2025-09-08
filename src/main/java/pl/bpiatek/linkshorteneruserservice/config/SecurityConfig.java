@@ -35,9 +35,9 @@ class SecurityConfig {
     @Bean
     UserDetailsService userDetailsService() {
         UserDetails user = User.builder()
-                .username("bpiatek") // Or read from properties
-                .password(passwordEncoder().encode("dupa1234")) // Or read from properties
-                .roles("USER") // Add roles if needed
+                .username("bpiatek")
+                .password(passwordEncoder().encode("dupa1234"))
+                .roles("USER", "ADMIN")
                 .build();
         return new InMemoryUserDetailsManager(user);
     }
@@ -48,12 +48,12 @@ class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/actuator/prometheus").permitAll()
                         .requestMatchers(
                                 "/auth/register",
                                 "/auth/login",
-                                "/error").permitAll()
-                        .requestMatchers("/actuator/**").authenticated()
+                                "/error",
+                                //TODO restrict it later
+                                "/actuator/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .httpBasic(Customizer.withDefaults());
