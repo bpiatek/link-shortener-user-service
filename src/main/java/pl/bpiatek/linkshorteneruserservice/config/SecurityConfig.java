@@ -36,10 +36,11 @@ class SecurityConfig {
                         .requestMatchers(
                                 "/auth/register",
                                 "/auth/login",
-                                "/error",
-                                "/actuator/**").permitAll()
+                                "/error").permitAll()
+                        .requestMatchers("/actuator/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 );
+
         return http.build();
     }
 }

@@ -1,9 +1,13 @@
-<configuration>
-    <!-- This variable is provided by Spring Boot's base.xml -->
-    <property name="CONSOLE_LOG_PATTERN"
-              value="%clr(%d{${LOG_DATEFORMAT_PATTERN:-yyyy-MM-dd'T'HH:mm:ss.SSS'Z'}})%clr(${LOG_LEVEL_PATTERN:-%5p}) %clr(${PID:- }){magenta} %clr(---){faint} %clr([%15.15t]){faint} %clr(%-40.40logger{39}){cyan} %clr(:){faint} %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}}"/>
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration scan="true" scanPeriod="60 seconds">
 
-    <!-- Define a standard console appender (for local development if needed) -->
+    <!-- Standard console log pattern -->
+    <property name="CONSOLE_LOG_PATTERN"
+              value="%d{yyyy-MM-dd'T'HH:mm:ss.SSS'Z'} %-5level [%thread] %logger{36} - %msg%n"/>
+
+    <!-- === Console Appenders === -->
+
+    <!-- Human-readable console appender -->
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
             <pattern>${CONSOLE_LOG_PATTERN}</pattern>
@@ -11,8 +15,8 @@
         </encoder>
     </appender>
 
-    <!-- Define our JSON console appender -->
-    <appender name="jsonConsole" class="ch.qos.logback.core.ConsoleAppender">
+    <!-- JSON console appender for Loki -->
+    <appender name="JSON_CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder class="net.logstash.logback.encoder.LogstashEncoder">
             <fieldNames>
                 <message>message</message>
@@ -21,19 +25,30 @@
         </encoder>
     </appender>
 
-    <!-- Spring Profile for LOCAL development -->
-    <!-- When the 'local' profile is active, use the standard, human-readable console log -->
+    <!-- === File Appender for SBA === -->
+    <appender name="SBA_FILE" class="ch.qos.logback.core.FileAppender">
+        <file>/tmp/user-service.log</file>
+        <append>true</append>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%thread] %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- === Profiles === -->
+
+    <!-- Local profile: human-readable logs only -->
     <springProfile name="local">
         <root level="INFO">
             <appender-ref ref="CONSOLE"/>
         </root>
     </springProfile>
 
-    <!-- Spring Profile for DEPLOYED environments (dev, prod, etc.) -->
-    <!-- When any profile OTHER THAN 'local' is active, use the JSON log -->
+    <!-- Non-local profiles: JSON logs for Loki + file for SBA -->
     <springProfile name="!local">
         <root level="INFO">
-            <appender-ref ref="jsonConsole"/>
+            <appender-ref ref="JSON_CONSOLE"/>
+            <appender-ref ref="SBA_FILE"/>
         </root>
     </springProfile>
+
 </configuration>
