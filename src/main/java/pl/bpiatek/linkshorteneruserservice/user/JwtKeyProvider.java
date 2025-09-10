@@ -36,16 +36,16 @@ class JwtKeyProvider {
     private KeyPair loadRsaKeyPairFromVaultFile(String keyFilePath) {
         try {
             // 1. Read the JSON file injected by the Vault Agent
-            File keyFile = new File(keyFilePath);
-            String jsonContent = new String(Files.readAllBytes(keyFile.toPath()));
+            var keyFile = new File(keyFilePath);
+            var jsonContent = new String(Files.readAllBytes(keyFile.toPath()));
 
             // 2. Parse the JSON into a Map
-            ObjectMapper mapper = new ObjectMapper();
+            var mapper = new ObjectMapper();
             Map<String, String> keys = mapper.readValue(jsonContent, Map.class);
 
             // 3. Decode the PEM strings into actual key objects
-            PublicKey publicKey = decodePublicKey(keys.get("rsa-public-key"));
-            PrivateKey privateKey = decodePrivateKey(keys.get("rsa-private-key"));
+            var publicKey = decodePublicKey(keys.get("rsa-public-key"));
+            var privateKey = decodePrivateKey(keys.get("rsa-private-key"));
 
             return new KeyPair(publicKey, privateKey);
 
@@ -55,24 +55,18 @@ class JwtKeyProvider {
     }
 
     // Helper method to parse the PEM-formatted private key
-    private PrivateKey decodePrivateKey(String pemKey) throws NoSuchAlgorithmException, InvalidKeySpecException {
-        String privateKeyContent = pemKey
-                .replaceAll("\\n", "")
-                .replace("-----BEGIN PRIVATE KEY-----", "")
-                .replace("-----END PRIVATE KEY-----", "");
-        KeyFactory kf = KeyFactory.getInstance("RSA");
-        PKCS8EncodedKeySpec keySpecPKCS8 = new PKCS8EncodedKeySpec(Base64.getDecoder().decode(privateKeyContent));
-        return kf.generatePrivate(keySpecPKCS8);
+    private PrivateKey decodePrivateKey(String base64Key) throws NoSuchAlgorithmException, InvalidKeySpecException {
+        var keyBytes = Base64.getDecoder().decode(base64Key);
+        var keySpec = new PKCS8EncodedKeySpec(keyBytes);
+        var kf = KeyFactory.getInstance("RSA");
+        return kf.generatePrivate(keySpec);
     }
 
-    // Helper method to parse the PEM-formatted public key
-    private PublicKey decodePublicKey(String pemKey) throws NoSuchAlgorithmException, InvalidKeySpecException {
-        String publicKeyContent = pemKey
-                .replaceAll("\\n", "")
-                .replace("-----BEGIN PUBLIC KEY-----", "")
-                .replace("-----END PUBLIC KEY-----", "");
-        KeyFactory kf = KeyFactory.getInstance("RSA");
-        X509EncodedKeySpec keySpecX509 = new X509EncodedKeySpec(Base64.getDecoder().decode(publicKeyContent));
-        return kf.generatePublic(keySpecX509);
+    // Helper method to decode a Base64 string into a PublicKey
+    private PublicKey decodePublicKey(String base64Key) throws NoSuchAlgorithmException, InvalidKeySpecException {
+        var keyBytes = Base64.getDecoder().decode(base64Key);
+        var keySpec = new X509EncodedKeySpec(keyBytes);
+        var kf = KeyFactory.getInstance("RSA");
+        return kf.generatePublic(keySpec);
     }
 }
