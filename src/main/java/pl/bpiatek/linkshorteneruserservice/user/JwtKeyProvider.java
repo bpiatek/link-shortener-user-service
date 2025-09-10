@@ -21,7 +21,7 @@ class JwtKeyProvider {
 
     private final KeyPair keyPair;
 
-    JwtKeyProvider(@Value("${vault.secrets.path:/vault/secrets/jwt-key-json}") String keyFilePath) {
+    JwtKeyProvider(@Value("${vault.secrets.path:/vault/secrets/jwtkeyjson}") String keyFilePath) {
         this.keyPair = loadRsaKeyPairFromVaultFile(keyFilePath);
     }
 
