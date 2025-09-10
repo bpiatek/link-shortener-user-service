@@ -22,7 +22,7 @@ vault:
       secretTemplate: |
         {{- with secret "kv/data/dev/link-shortener-user-service/jwt" -}}
         {
-          "rsa_private_key": {{ .Data.data.rsa-private-key-b64 | base64Decode | quote }},
-          "rsa_public_key": {{ .Data.data.rsa-public-key-b64 | base64Decode | quote }}
+          "rsa_private_key": {{ index .Data.data "rsa-private-key-b64" | base64Decode | quote }},
+          "rsa_public_key": {{ index .Data.data "rsa-public-key-b64" | base64Decode | quote }}
         }
         {{- end -}}
