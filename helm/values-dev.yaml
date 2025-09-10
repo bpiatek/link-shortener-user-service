@@ -18,7 +18,7 @@ vault:
     {{- end }}
   extraSecrets:
     "jwt-key.json":
-      secretPath: "kv/data/dev/link-shortener-user-service/jwt"
+      secretPath: kv/data/dev/link-shortener-user-service/jwt
       secretTemplate: |
         {{- with secret "kv/data/dev/link-shortener-user-service/jwt" -}}
         {
