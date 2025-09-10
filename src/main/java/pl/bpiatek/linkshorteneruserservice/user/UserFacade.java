@@ -12,7 +12,7 @@ public class UserFacade {
     private final AuthService authService;
     private final JwtKeyProvider jwtKeyProvider;
 
-    private UserFacade(AuthService authService, JwtKeyProvider jwtKeyProvider) {
+    UserFacade(AuthService authService, JwtKeyProvider jwtKeyProvider) {
         this.authService = authService;
         this.jwtKeyProvider = jwtKeyProvider;
     }
