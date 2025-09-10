@@ -16,3 +16,10 @@ vault:
     {{ $key }}={{ $value }}
     {{- end }}
     {{- end }}
+  extraSecrets:
+    "jwt-key.json":
+      secretPath: "kv/data/dev/link-shortener-user-service/jwt"
+      secretTemplate: |
+        {{- with secret "kv/data/dev/link-shortener-user-service/jwt" -}}
+        {{- .Data.data | toJSON -}}
+        {{- end -}}

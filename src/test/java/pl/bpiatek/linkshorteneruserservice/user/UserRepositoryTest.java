@@ -14,6 +14,7 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.time.Instant;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
@@ -36,17 +37,18 @@ class UserRepositoryTest {
 
     @AfterEach
     void cleanup() {
+        jdbcTemplate.update("DELETE FROM user_roles");
         jdbcTemplate.update("DELETE FROM users");
     }
 
     @Test
     void shouldSaveAndFindUserByEmail() {
         // given
-        User newUser = new User(
+        var newUser = new User(
                 null,
                 "test@example.com",
                 "hashed_password_123",
-                "ROLE_USER",
+                List.of("ROLE_USER"),
                 false,
                 Instant.now()
         );
@@ -61,7 +63,7 @@ class UserRepositoryTest {
             var user = foundUser.get();
             softly.assertThat(user.email()).isEqualTo(newUser.email());
             softly.assertThat(user.passwordHash()).isEqualTo(newUser.passwordHash());
-            softly.assertThat(user.role()).isEqualTo(newUser.role());
+            softly.assertThat(user.roles()).containsExactly("ROLE_USER");
             softly.assertThat(user.isEmailVerified()).isEqualTo(newUser.isEmailVerified());
             softly.assertThat(user.createdAt()).isNotNull();
         });

@@ -62,7 +62,8 @@ class SecurityConfig {
                                 "/auth/register",
                                 "/auth/login",
                                 "/error",
-                                "/actuator/prometheus").permitAll()
+                                "/actuator/prometheus",
+                                "/.well-known/jwks.json").permitAll()
                         .requestMatchers("/actuator/**").authenticated()
                         .anyRequest().permitAll()
                 )
