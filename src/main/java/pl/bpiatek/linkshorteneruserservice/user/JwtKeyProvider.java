@@ -44,8 +44,8 @@ class JwtKeyProvider {
             Map<String, String> keys = mapper.readValue(jsonContent, Map.class);
 
             // 3. Decode the PEM strings into actual key objects
-            PublicKey publicKey = decodePublicKey(keys.get("rsa-public-key"));
-            PrivateKey privateKey = decodePrivateKey(keys.get("rsa-private-key"));
+            PublicKey publicKey = decodePublicKey(keys.get("rsa_public_key"));
+            PrivateKey privateKey = decodePrivateKey(keys.get("rsa_private_key"));
 
             return new KeyPair(publicKey, privateKey);
 
