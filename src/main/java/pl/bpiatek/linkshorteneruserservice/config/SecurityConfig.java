@@ -1,10 +1,8 @@
 package pl.bpiatek.linkshorteneruserservice.config;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -42,10 +40,8 @@ class SecurityConfig {
                                 "/error",
                                 "/.well-known/jwks.json").permitAll()
                         .requestMatchers("/actuator/**").hasRole("MONITORING")
-                        .anyRequest().permitAll()
-                )
-                .httpBasic(withDefaults())
-                .oauth2ResourceServer(oauth2 -> oauth2.jwt(withDefaults()));
+                        .anyRequest().denyAll())
+                .httpBasic(withDefaults());
 
         return http.build();
     }
