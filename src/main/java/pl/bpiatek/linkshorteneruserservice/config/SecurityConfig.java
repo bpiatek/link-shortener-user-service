@@ -42,6 +42,7 @@ class SecurityConfig {
                                 "/auth/login",
                                 "/error",
                                 "/.well-known/jwks.json").permitAll()
+                        .requestMatchers("/test-config").authenticated()
                         .anyRequest().denyAll()
                 );
 
