@@ -13,7 +13,7 @@ import static org.springframework.security.config.http.SessionCreationPolicy.STA
 class PrometheusSecurityFilterChain {
 
     @Bean
-    @Order(2)
+    @Order(1)
     SecurityFilterChain prometheusSecurityFilterChain(HttpSecurity http) throws Exception {
         http
                 .securityMatcher("/actuator/prometheus")
