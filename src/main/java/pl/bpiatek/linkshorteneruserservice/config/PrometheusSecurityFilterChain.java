@@ -7,21 +7,19 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.web.SecurityFilterChain;
 
-import static org.springframework.security.config.Customizer.withDefaults;
 import static org.springframework.security.config.http.SessionCreationPolicy.STATELESS;
 
 @Configuration
-class ActuatorSecurityConfig {
+class PrometheusSecurityFilterChain {
 
     @Bean
-    @Order(1)
+    @Order(2)
     public SecurityFilterChain actuatorSecurityFilterChain(HttpSecurity http) throws Exception {
         http
-                .securityMatcher("/actuator/**")
+                .securityMatcher("/actuator/prometheus")
                 .authorizeHttpRequests(auth -> auth
-                        .anyRequest().hasRole("MONITORING")
+                        .anyRequest().permitAll()
                 )
-                .httpBasic(withDefaults())
                 .sessionManagement(session -> session.sessionCreationPolicy(STATELESS))
                 .csrf(AbstractHttpConfigurer::disable);
         return http.build();
