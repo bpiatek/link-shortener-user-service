@@ -34,16 +34,8 @@ class SecurityConfig {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(STATELESS))
-                .httpBasic(AbstractHttpConfigurer::disable)
-                .formLogin(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(
-                                "/auth/register",
-                                "/auth/login",
-                                "/error",
-                                "/.well-known/jwks.json").permitAll()
-                        .requestMatchers("/test-config").authenticated()
-                        .anyRequest().denyAll()
+                        .anyRequest().permitAll()
                 );
 
         return http.build();
