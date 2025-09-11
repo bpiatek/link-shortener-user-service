@@ -14,7 +14,7 @@ class PrometheusSecurityFilterChain {
 
     @Bean
     @Order(1)
-    SecurityFilterChain prometheusSecurityFilterChain(HttpSecurity http) throws Exception {
+    SecurityFilterChain prometheusFilterChain(HttpSecurity http) throws Exception {
         http
                 .securityMatcher("/actuator/prometheus")
                 .authorizeHttpRequests(auth -> auth

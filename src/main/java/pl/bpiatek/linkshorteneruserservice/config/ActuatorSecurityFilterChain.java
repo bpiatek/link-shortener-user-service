@@ -15,7 +15,7 @@ class ActuatorSecurityFilterChain {
 
     @Bean
     @Order(2)
-    SecurityFilterChain actuatorSecurityFilterChain(HttpSecurity http) throws Exception {
+    SecurityFilterChain actuatorFilterChain(HttpSecurity http) throws Exception {
         http
                 .securityMatcher("/actuator/**")
                 .authorizeHttpRequests(auth -> auth
@@ -24,6 +24,7 @@ class ActuatorSecurityFilterChain {
                 .httpBasic(withDefaults())
                 .sessionManagement(session -> session.sessionCreationPolicy(STATELESS))
                 .csrf(AbstractHttpConfigurer::disable);
+
         return http.build();
     }
 }
