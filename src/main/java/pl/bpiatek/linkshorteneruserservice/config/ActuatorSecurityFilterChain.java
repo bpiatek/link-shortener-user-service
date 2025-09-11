@@ -15,7 +15,7 @@ class ActuatorSecurityFilterChain {
 
     @Bean
     @Order(2)
-    public SecurityFilterChain actuatorSecurityFilterChain(HttpSecurity http) throws Exception {
+    SecurityFilterChain actuatorSecurityFilterChain(HttpSecurity http) throws Exception {
         http
                 .securityMatcher("/actuator/**")
                 .authorizeHttpRequests(auth -> auth
