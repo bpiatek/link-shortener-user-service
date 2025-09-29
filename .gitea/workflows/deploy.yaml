@@ -62,7 +62,7 @@ jobs:
           set -euo pipefail
           echo "Deploying with Helm..."
           sudo /snap/bin/microk8s helm upgrade --install \
-            link-shortener-redirect-service-${{ github.event.inputs.environment }} \
+            link-shortener-user-service-${{ github.event.inputs.environment }} \
             ./helm \
             --namespace ${{ github.event.inputs.environment }} \
             --values helm/values-${{ github.event.inputs.environment }}.yaml \
