@@ -23,6 +23,16 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
+      - name: Create Maven settings.xml for Docker build
+        run: |
+          SETTINGS_FILE="settings.xml"
+          echo "<settings xmlns='http://maven.apache.org/SETTINGS/1.0.0'
+                xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
+                xsi:schemaLocation='http://maven.apache.org/SETTINGS/1.0.0
+                                    https://maven.apache.org/xsd/settings-1.0.0.xsd'>
+            </settings>" > "$SETTINGS_FILE"
+          echo "Maven settings.xml for Docker created."
+
       - name: Get Image Tag and Name
         id: image_info
         run: |
@@ -35,6 +45,12 @@ jobs:
             --secret id=maven-settings,src=settings.xml \
             -t ${{ steps.image_info.outputs.name }}:${{ steps.image_info.outputs.tag }} .
           echo "Docker image built: ${{ steps.image_info.outputs.name }}:${{ steps.image_info.outputs.tag }}"
+
+      - name: Clean up Maven settings.xml
+        if: always()
+        run: |
+          rm settings.xml
+          echo "Cleaned up temporary settings.xml"
 
       - name: Import Image into MicroK8s
         run: |
