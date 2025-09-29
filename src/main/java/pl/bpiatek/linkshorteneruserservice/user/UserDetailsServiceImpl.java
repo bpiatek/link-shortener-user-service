@@ -1,6 +1,5 @@
 package pl.bpiatek.linkshorteneruserservice.user;
 
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.User;
@@ -9,7 +8,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 
-import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
@@ -25,7 +23,7 @@ class UserDetailsServiceImpl implements UserDetailsService {
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         return userRepository.findByEmail(email)
                 .map(dbUser -> {
-                    List<GrantedAuthority> authorities = dbUser.roles().stream()
+                    var authorities = dbUser.roles().stream()
                             .map(SimpleGrantedAuthority::new)
                             .collect(Collectors.toList());
 
