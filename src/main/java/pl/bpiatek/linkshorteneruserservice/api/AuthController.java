@@ -38,6 +38,7 @@ class AuthController {
     @PostMapping("/login")
     ResponseEntity<LoginResponse> loginUser(@Valid @RequestBody LoginRequest request) {
         log.info("Logging in user: {}", request.email());
+        log.info("HTTP request running on virtual thread: {}", Thread.currentThread().isVirtual());
         var tokens = userFacade.login(request.email(), request.password());
         return ResponseEntity.ok(tokens);
     }
