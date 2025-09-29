@@ -1,57 +1,49 @@
 # ===================================================================================
-# STAGE 1: The "Builder" Stage
-# - Uses a full JDK and Maven to build the application.
-# - This stage will be discarded and not included in the final image.
+# STAGE 1: Builder
+# This stage builds the application, using a persistent cache for dependencies.
 # ===================================================================================
-FROM eclipse-temurin:21-jdk-jammy as builder
+FROM eclipse-temurin:21-jdk-jammy AS builder
 
 WORKDIR /app
 
-# Copy only the files needed to download dependencies
+# Explicitly create the .m2 directory so that Docker's mount command
+# has a valid target path to mount the cache volume onto.
+RUN mkdir -p /root/.m2
+
+# 1. Copy only the files needed to resolve dependencies.
+# This layer will be cached as long as pom.xml doesn't change.
 COPY .mvn/ .mvn
 COPY mvnw pom.xml ./
 
-# Download dependencies into a separate, cached layer
-# This layer only changes if you modify pom.xml
-RUN ./mvnw dependency:resolve
+# 2. Resolve dependencies. This is the slow, memory-intensive step.
+# --mount=type=secret: Securely provides the settings.xml for authentication.
+# --mount=type=cache: Persists the downloaded JARs in a cache volume between builds,
+# making subsequent builds much faster.
+RUN --mount=type=secret,id=maven-settings,target=/root/.m2/settings.xml \
+    --mount=type=cache,target=/root/.m2 \
+    ./mvnw dependency:resolve --global-settings /root/.m2/settings.xml
 
-# Copy the rest of the source code
+# 3. Copy the application source code.
+# This layer will only be rebuilt if your Java code changes.
 COPY src ./src
 
-# Build the application JAR
-# This layer only changes if your source code changes
-RUN ./mvnw package -DskipTests
+# 4. Build the application JAR.
+# This will be very fast on subsequent runs because all dependencies are already in the cache.
+RUN --mount=type=secret,id=maven-settings,target=/root/.m2/settings.xml \
+    --mount=type=cache,target=/root/.m2 \
+    ./mvnw package -DskipTests --global-settings /root/.m2/settings.xml
 
 
 # ===================================================================================
-# STAGE 2: The "Extractor" Stage
-# - Extracts the layers from the JAR file created by the builder.
-# ===================================================================================
-FROM builder as extractor
-
-# Copy the JAR from the builder stage
-COPY --from=builder /app/target/*.jar application.jar
-
-# Use Spring Boot's layertools to extract the application into separate layers
-# This creates folders like /dependencies, /spring-boot-loader, /application, etc.
-RUN java -Djarmode=layertools -jar application.jar extract
-
-
-# ===================================================================================
-# STAGE 3: The Final Image
-# - Uses a minimal Java Runtime Environment (JRE), not a full JDK.
-# - Copies the extracted layers in the correct order for optimal caching.
+# STAGE 2: Final Image
+# This stage creates the final, minimal image for production.
 # ===================================================================================
 FROM eclipse-temurin:21-jre-jammy
 
 WORKDIR /app
 
-# Copy the layers from the extractor stage in order of least to most frequently changing
-COPY --from=extractor /app/dependencies/ ./
-COPY --from=extractor /app/spring-boot-loader/ ./
-COPY --from=extractor /app/snapshot-dependencies/ ./
-COPY --from=extractor /app/application/ ./
+# Copy only the final application JAR from the builder stage.
+COPY --from=builder /app/target/*.jar app.jar
 
-# The entrypoint is different now. We use the JarLauncher which knows
-# how to run the application from the exploded directory structure.
-ENTRYPOINT ["java", "org.springframework.boot.loader.launch.JarLauncher"]
+# Set the entrypoint to run the application.
+ENTRYPOINT ["java", "-jar", "app.jar"]
