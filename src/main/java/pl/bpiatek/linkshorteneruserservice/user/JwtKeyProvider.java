@@ -17,13 +17,12 @@ import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
 import java.util.Map;
 
-@Component
 class JwtKeyProvider {
 
     private static final Logger log = LoggerFactory.getLogger(JwtKeyProvider.class);
     private final KeyPair keyPair;
 
-    JwtKeyProvider(@Value("${vault.secrets.path:/vault/secrets/jwtkeyjson}") String keyFilePath) {
+    JwtKeyProvider(String keyFilePath) {
         this.keyPair = loadRsaKeyPairFromVaultFile(keyFilePath);
     }
 

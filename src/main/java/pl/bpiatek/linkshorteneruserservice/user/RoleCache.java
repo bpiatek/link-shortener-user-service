@@ -9,7 +9,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-@Component
 class RoleCache {
 
     private final NamedParameterJdbcTemplate namedJdbcTemplate;

@@ -1,29 +1,30 @@
 package pl.bpiatek.linkshorteneruserservice.user;
 
-import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import pl.bpiatek.linkshorteneruserservice.api.dto.LoginResponse;
 
 import java.security.interfaces.RSAPublicKey;
 
-@Component
 public class UserFacade {
 
-    private final AuthService authService;
+    private final RegistrationService registrationService;
+    private final LoginService loginService;
     private final JwtKeyProvider jwtKeyProvider;
 
-    UserFacade(AuthService authService, JwtKeyProvider jwtKeyProvider) {
-        this.authService = authService;
+    UserFacade(RegistrationService registrationService, LoginService loginService, JwtKeyProvider jwtKeyProvider) {
+        this.registrationService = registrationService;
+        this.loginService = loginService;
         this.jwtKeyProvider = jwtKeyProvider;
     }
 
+
     @Transactional
     public void register(String email, String password) {
-        authService.register(email, password);
+        registrationService.register(email, password);
     }
 
     public LoginResponse login(String email, String password) {
-        return authService.login(email, password);
+        return loginService.login(email, password);
     }
 
     public RSAPublicKey getPublicKey() {

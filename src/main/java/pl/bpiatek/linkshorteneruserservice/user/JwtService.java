@@ -1,18 +1,13 @@
 package pl.bpiatek.linkshorteneruserservice.user;
 
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.security.Keys;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.stereotype.Service;
 import pl.bpiatek.linkshorteneruserservice.api.dto.LoginResponse;
 
-import javax.crypto.SecretKey;
 import java.time.Clock;
 import java.util.Date;
 
-@Service
 class JwtService {
 
     private final long accessTokenExpiration;
@@ -21,9 +16,8 @@ class JwtService {
     private final UserRepository userRepository;
     private final JwtKeyProvider jwtKeyProvider;
 
-    public JwtService(
-            @Value("${app.jwt.access-token.expiration}") long accessTokenExpiration,
-            @Value("${app.jwt.refresh-token.expiration}") long refreshTokenExpiration, Clock clock, UserRepository userRepository, JwtKeyProvider jwtKeyProvider) {
+    public JwtService(long accessTokenExpiration, long refreshTokenExpiration, Clock clock,
+                      UserRepository userRepository, JwtKeyProvider jwtKeyProvider) {
         this.accessTokenExpiration = accessTokenExpiration;
         this.refreshTokenExpiration = refreshTokenExpiration;
         this.clock = clock;

@@ -16,7 +16,7 @@ class MonitoringUserInserter {
 
     private static final Logger log = LoggerFactory.getLogger(MonitoringUserInserter.class);
 
-    private final UserRepository userRepository;
+    private final JdbcUserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final Clock clock;
 
@@ -27,7 +27,7 @@ class MonitoringUserInserter {
     private String monitoringPassword;
 
 
-    MonitoringUserInserter(UserRepository userRepository, PasswordEncoder passwordEncoder, Clock clock) {
+    MonitoringUserInserter(JdbcUserRepository userRepository, PasswordEncoder passwordEncoder, Clock clock) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.clock = clock;

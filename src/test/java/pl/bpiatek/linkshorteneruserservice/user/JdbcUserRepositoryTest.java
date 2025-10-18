@@ -4,14 +4,11 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
-import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
+import pl.bpiatek.linkshorteneruserservice.WithPostgres;
 
 import java.time.Instant;
 import java.util.List;
@@ -21,13 +18,9 @@ import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 @Testcontainers
 @JdbcTest
-@Import(UserRepository.class)
+@Import({JdbcUserRepository.class, RoleCache.class})
 @ActiveProfiles("test")
-class UserRepositoryTest {
-
-    @Container
-    @ServiceConnection
-    static final PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:16-alpine");
+class JdbcUserRepositoryTest implements WithPostgres {
 
     @Autowired
     UserRepository userRepository;
