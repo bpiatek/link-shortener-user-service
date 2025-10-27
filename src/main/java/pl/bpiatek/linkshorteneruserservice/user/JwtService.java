@@ -28,7 +28,7 @@ class JwtService {
     LoginResponse generateTokens(Authentication authentication) {
         var email = authentication.getName();
 
-        User user = userRepository.findByEmail(email)
+        var user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found after authentication: " + email));
 
         var accessToken = generateAccessToken(user);
@@ -52,16 +52,15 @@ class JwtService {
     }
 
     private String generateRefreshToken(User user) {
-        Date now = new Date();
-        Date expiryDate = new Date(now.getTime() + refreshTokenExpiration);
+        var now = Date.from(clock.instant());
+        var expirationDate = new Date(now.getTime() + refreshTokenExpiration);
 
         return Jwts.builder()
-                .subject(user.id().toString()) // Use user ID in refresh token too
+                .subject(user.id().toString())
                 .claim("type", "refresh")
                 .issuedAt(now)
-                .expiration(expiryDate)
+                .expiration(expirationDate)
                 .signWith(jwtKeyProvider.getPrivateKey())
                 .compact();
     }
-
 }

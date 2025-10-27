@@ -6,7 +6,6 @@ import org.apache.kafka.common.header.internals.RecordHeader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
-import pl.bpiatek.contracts.user.UserLifecycleEventProto;
 import pl.bpiatek.contracts.user.UserLifecycleEventProto.UserLifecycleEvent;
 import pl.bpiatek.contracts.user.UserLifecycleEventProto.UserRegistered;
 
@@ -16,17 +15,17 @@ import java.util.concurrent.ExecutionException;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
-class UserKafkaProducer {
+class UserRegisteredKafkaProducer {
 
-    private static final Logger log = LoggerFactory.getLogger(UserKafkaProducer.class);
+    private static final Logger log = LoggerFactory.getLogger(UserRegisteredKafkaProducer.class);
     private static final String SOURCE_HEADER_VALUE = "user-service";
 
     private final KafkaTemplate<String, UserLifecycleEvent> kafkaTemplate;
     private final String topicName;
     private final Clock clock;
 
-    UserKafkaProducer(KafkaTemplate<String, UserLifecycleEvent> kafkaTemplate,
-                      String topicName, Clock clock) {
+    UserRegisteredKafkaProducer(KafkaTemplate<String, UserLifecycleEvent> kafkaTemplate,
+                                String topicName, Clock clock) {
         this.kafkaTemplate = kafkaTemplate;
         this.topicName = topicName;
         this.clock = clock;
@@ -67,7 +66,7 @@ class UserKafkaProducer {
         } catch (InterruptedException | ExecutionException e) {
             log.error("Failed to publish UserRegistered event for userId: {}. Reason: {}",
                     userId,
-                    e.getMessage());
+                    e.getCause().getMessage());
 
             if (e instanceof InterruptedException) {
                 Thread.currentThread().interrupt();

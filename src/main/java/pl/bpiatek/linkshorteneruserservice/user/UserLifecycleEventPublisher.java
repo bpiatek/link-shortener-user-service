@@ -6,16 +6,16 @@ import org.springframework.transaction.event.TransactionalEventListener;
 
 class UserLifecycleEventPublisher {
 
-    private final UserKafkaProducer userKafkaProducer;
+    private final UserRegisteredKafkaProducer userRegisteredKafkaProducer;
 
-    UserLifecycleEventPublisher(UserKafkaProducer userKafkaProducer) {
-        this.userKafkaProducer = userKafkaProducer;
+    UserLifecycleEventPublisher(UserRegisteredKafkaProducer userRegisteredKafkaProducer) {
+        this.userRegisteredKafkaProducer = userRegisteredKafkaProducer;
     }
 
     @Async
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     void handleUserRegisteredEvent(UserRegisteredApplicationEvent event) {
-        userKafkaProducer.sendUserRegisteredEvent(
+        userRegisteredKafkaProducer.sendUserRegisteredEvent(
                 event.userId(),
                 event.email(),
                 event.verificationToken()

@@ -44,12 +44,11 @@ class JdbcUserRepository implements  UserRepository {
 
     @Override
     public User save(User user) {
-        Map<String, Object> params = Map.of(
-                "email", user.email(),
-                "password_hash", user.passwordHash(),
-                "is_email_verified", user.isEmailVerified(),
-                "created_at", Timestamp.from(user.createdAt())
-        );
+        var params = new MapSqlParameterSource()
+                .addValue("email", user.email())
+                .addValue("password_hash", user.passwordHash())
+                .addValue("is_email_verified", user.isEmailVerified())
+                .addValue("created_at", Timestamp.from(user.createdAt()));
 
         var key = userInsert.executeAndReturnKey(params);
         long generatedId = key.longValue();

@@ -36,6 +36,7 @@
         <nimbus-jose-jwt.version>10.5</nimbus-jose-jwt.version>
         <confluent.version>8.0.0</confluent.version>
         <link-shortener-contracts.version>0.0.9</link-shortener-contracts.version>
+        <logcaptor.version>2.12.1</logcaptor.version>
     </properties>
 
     <dependencies>
@@ -190,6 +191,12 @@
         <dependency>
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.github.hakky54</groupId>
+            <artifactId>logcaptor</artifactId>
+            <version>${logcaptor.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

@@ -17,6 +17,8 @@ import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
 import java.util.Map;
 
+import static java.nio.charset.StandardCharsets.*;
+
 class JwtKeyProvider {
 
     private static final Logger log = LoggerFactory.getLogger(JwtKeyProvider.class);
@@ -36,19 +38,19 @@ class JwtKeyProvider {
 
     private KeyPair loadRsaKeyPairFromVaultFile(String keyFilePath) {
         try {
-            ObjectMapper mapper = new ObjectMapper();
+            var mapper = new ObjectMapper();
             Map<String, String> keys = mapper.readValue(new File(keyFilePath), new TypeReference<>() {});
 
-            String privateKeyB64 = keys.get("rsa-private-key");
-            String publicKeyB64  = keys.get("rsa-public-key");
+            var privateKeyB64 = keys.get("rsa-private-key");
+            var publicKeyB64  = keys.get("rsa-public-key");
 
             // Step 1: Base64-decode Vault strings → PEM text
-            String privatePem = new String(Base64.getDecoder().decode(privateKeyB64), StandardCharsets.UTF_8);
-            String publicPem  = new String(Base64.getDecoder().decode(publicKeyB64), StandardCharsets.UTF_8);
+            var privatePem = new String(Base64.getDecoder().decode(privateKeyB64), UTF_8);
+            var publicPem  = new String(Base64.getDecoder().decode(publicKeyB64), UTF_8);
 
             // Step 2: strip headers/footers + decode again
-            PrivateKey privateKey = decodePrivateKey(privatePem);
-            PublicKey  publicKey  = decodePublicKey(publicPem);
+            var privateKey = decodePrivateKey(privatePem);
+            var  publicKey  = decodePublicKey(publicPem);
 
             return new KeyPair(publicKey, privateKey);
         } catch (Exception e) {
@@ -57,20 +59,20 @@ class JwtKeyProvider {
     }
 
     private PrivateKey decodePrivateKey(String pem) throws Exception {
-        String normalized = pem
+        var normalized = pem
                 .replaceAll("-----BEGIN (.*)-----", "")
                 .replaceAll("-----END (.*)-----", "")
                 .replaceAll("\\s", "");
-        byte[] der = Base64.getDecoder().decode(normalized);
+        var der = Base64.getDecoder().decode(normalized);
         return KeyFactory.getInstance("RSA").generatePrivate(new PKCS8EncodedKeySpec(der));
     }
 
     private PublicKey decodePublicKey(String pem) throws Exception {
-        String normalized = pem
+        var normalized = pem
                 .replaceAll("-----BEGIN (.*)-----", "")
                 .replaceAll("-----END (.*)-----", "")
                 .replaceAll("\\s", "");
-        byte[] der = Base64.getDecoder().decode(normalized);
+        var der = Base64.getDecoder().decode(normalized);
         return KeyFactory.getInstance("RSA").generatePublic(new X509EncodedKeySpec(der));
     }
 }

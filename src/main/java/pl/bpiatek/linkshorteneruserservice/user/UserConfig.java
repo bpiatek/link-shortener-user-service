@@ -77,15 +77,15 @@ class UserConfig {
     }
 
     @Bean
-    UserKafkaProducer userKafkaProducer(KafkaTemplate<String, UserLifecycleEvent> kafkaTemplate,
-                                        @Value("${topic.user.lifecycle}") String topicName,
-                                        Clock clock) {
-       return new UserKafkaProducer(kafkaTemplate, topicName, clock);
+    UserRegisteredKafkaProducer userKafkaProducer(KafkaTemplate<String, UserLifecycleEvent> kafkaTemplate,
+                                                  @Value("${topic.user.lifecycle}") String topicName,
+                                                  Clock clock) {
+       return new UserRegisteredKafkaProducer(kafkaTemplate, topicName, clock);
     }
 
     @Bean
-    UserLifecycleEventPublisher userLifecycleEventPublisher(UserKafkaProducer userKafkaProducer) {
-        return new UserLifecycleEventPublisher(userKafkaProducer);
+    UserLifecycleEventPublisher userLifecycleEventPublisher(UserRegisteredKafkaProducer userRegisteredKafkaProducer) {
+        return new UserLifecycleEventPublisher(userRegisteredKafkaProducer);
     }
 
     @Bean

@@ -11,7 +11,6 @@ import org.springframework.kafka.annotation.EnableKafka;
 import org.springframework.kafka.core.DefaultKafkaProducerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.core.ProducerFactory;
-import pl.bpiatek.contracts.user.UserLifecycleEventProto;
 import pl.bpiatek.contracts.user.UserLifecycleEventProto.UserLifecycleEvent;
 
 import java.util.HashMap;

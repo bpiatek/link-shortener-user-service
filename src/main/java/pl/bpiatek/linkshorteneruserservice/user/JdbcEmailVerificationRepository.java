@@ -49,7 +49,7 @@ class JdbcEmailVerificationRepository implements  EmailVerificationRepository {
         var params = new MapSqlParameterSource().addValue("tokenHash", tokenHash);
 
         try {
-            EmailVerification verification = namedJdbcTemplate.queryForObject(sql, params, rowMapper);
+            var verification = namedJdbcTemplate.queryForObject(sql, params, rowMapper);
             return Optional.ofNullable(verification);
         } catch (EmptyResultDataAccessException e) {
             return Optional.empty();
