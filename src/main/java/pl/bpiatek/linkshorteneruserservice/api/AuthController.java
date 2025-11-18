@@ -53,11 +53,11 @@ class AuthController {
     }
 
     @GetMapping("/verify")
-    ResponseEntity<Void> verifyEmail(@RequestParam String rawToken) {
-        log.info("Verifying email with token: {}", rawToken);
+    ResponseEntity<Void> verifyEmail(@RequestParam("token") String token) {
+        log.info("Verifying email with token: {}", token);
 
         try {
-            emailFacade.verifyEmail(rawToken);
+            emailFacade.verifyEmail(token);
             return ResponseEntity
                     .status(HttpStatus.FOUND)
                     .location(URI.create("/")) //TODO later successful address
