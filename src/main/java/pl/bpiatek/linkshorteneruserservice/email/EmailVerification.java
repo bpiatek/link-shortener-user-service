@@ -1,4 +1,4 @@
-package pl.bpiatek.linkshorteneruserservice.user;
+package pl.bpiatek.linkshorteneruserservice.email;
 
 import java.time.Instant;
 

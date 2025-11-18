@@ -5,4 +5,5 @@ import java.util.Optional;
 interface UserRepository {
     Optional<User> findByEmail(String email);
     User save(User user);
+    void verifyUser(Long userId);
 }

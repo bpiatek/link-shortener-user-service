@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.CONFLICT;
+import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 
 @RestControllerAdvice
 class GlobalExceptionHandler {
@@ -50,7 +51,7 @@ class GlobalExceptionHandler {
             UserAlreadyExistsException ex,
             HttpServletRequest request) {
 
-        ApiError apiError = new ApiError(
+        var apiError = new ApiError(
                 "/errors/user-already-exists",
                 "User Registration Failed",
                 CONFLICT.value(),
@@ -62,5 +63,24 @@ class GlobalExceptionHandler {
         log.warn("User registration failed: {}", ex.getMessage());
 
         return new ResponseEntity<>(apiError, CONFLICT);
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ApiError> handleGenericException(
+            Exception ex,
+            HttpServletRequest request) {
+
+        log.error("Unhandled exception occurred on request [{}]: {}", request.getRequestURI(), ex.getMessage(), ex);
+
+        var apiError = new ApiError(
+                "/errors/internal-server-error",
+                "Internal Server Error",
+                INTERNAL_SERVER_ERROR.value(),
+                "An unexpected internal error occurred. Please try again later.",
+                request.getRequestURI(),
+                null
+        );
+
+        return new ResponseEntity<>(apiError, INTERNAL_SERVER_ERROR);
     }
 }

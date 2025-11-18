@@ -10,11 +10,13 @@ public class UserFacade {
     private final RegistrationService registrationService;
     private final LoginService loginService;
     private final JwtKeyProvider jwtKeyProvider;
+    private final UserRepository userRepository;
 
-    UserFacade(RegistrationService registrationService, LoginService loginService, JwtKeyProvider jwtKeyProvider) {
+    UserFacade(RegistrationService registrationService, LoginService loginService, JwtKeyProvider jwtKeyProvider, UserRepository userRepository) {
         this.registrationService = registrationService;
         this.loginService = loginService;
         this.jwtKeyProvider = jwtKeyProvider;
+        this.userRepository = userRepository;
     }
 
 
@@ -29,5 +31,9 @@ public class UserFacade {
 
     public RSAPublicKey getPublicKey() {
         return jwtKeyProvider.getPublicKey();
+    }
+
+    public void verifyUser(Long userId) {
+        userRepository.verifyUser(userId);
     }
 }

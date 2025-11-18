@@ -1,4 +1,4 @@
-package pl.bpiatek.linkshorteneruserservice.user;
+package pl.bpiatek.linkshorteneruserservice.email;
 
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;

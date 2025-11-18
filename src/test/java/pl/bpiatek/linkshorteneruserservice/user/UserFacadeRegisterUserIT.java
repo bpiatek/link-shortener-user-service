@@ -63,7 +63,7 @@ class UserFacadeRegisterUserIT implements WithFullInfrastructure {
     }
 
     @Test
-    void shouldRegisterUser() throws InterruptedException {
+    void shouldRegisterUser() {
         // given
         var email = "test@example.com";
         var password = "password";

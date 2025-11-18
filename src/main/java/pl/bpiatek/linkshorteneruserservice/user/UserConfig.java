@@ -4,13 +4,13 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import pl.bpiatek.contracts.user.UserLifecycleEventProto.UserLifecycleEvent;
+import pl.bpiatek.linkshorteneruserservice.email.EmailFacade;
 
 import java.time.Clock;
 
@@ -35,8 +35,9 @@ class UserConfig {
     }
 
     @Bean
-    UserFacade userFacade(RegistrationService registrationService, LoginService loginService, JwtKeyProvider jwtKeyProvider) {
-        return new UserFacade(registrationService, loginService, jwtKeyProvider);
+    UserFacade userFacade(RegistrationService registrationService, LoginService loginService,
+                          JwtKeyProvider jwtKeyProvider, UserRepository userRepository) {
+        return new UserFacade(registrationService, loginService, jwtKeyProvider, userRepository);
     }
 
     @Bean
@@ -49,18 +50,11 @@ class UserConfig {
                                             PasswordEncoder passwordEncoder,
                                             Clock clock,
                                             ApplicationEventPublisher eventPublisher,
-                                            VerificationTokenService verificationTokenService) {
-        return new RegistrationService(userRepository, passwordEncoder, clock, eventPublisher, verificationTokenService);
+                                            EmailFacade emailFacade) {
+        return new RegistrationService(userRepository, passwordEncoder, clock, eventPublisher, emailFacade);
     }
 
-    @Bean
-    VerificationTokenService verificationTokenService(EmailVerificationRepository emailVerificationRepository,
-                                                      PasswordEncoder passwordEncoder,
-                                                      Clock clock,
-                                                      @Value("${verification.token.expiration}") long verificationTokenExpirationSec
-    ) {
-     return new VerificationTokenService(emailVerificationRepository, passwordEncoder, clock, verificationTokenExpirationSec);
-    }
+
 
     @Bean
     JwtService jwtService(@Value("${app.jwt.access-token.expiration}") long accessTokenExpiration,
@@ -86,10 +80,5 @@ class UserConfig {
     @Bean
     UserLifecycleEventPublisher userLifecycleEventPublisher(UserRegisteredKafkaProducer userRegisteredKafkaProducer) {
         return new UserLifecycleEventPublisher(userRegisteredKafkaProducer);
-    }
-
-    @Bean
-    EmailVerificationRepository emailVerificationRepository(JdbcTemplate jdbcTemplate, Clock clock) {
-        return new JdbcEmailVerificationRepository(jdbcTemplate, clock);
     }
 }

@@ -66,6 +66,17 @@ class JdbcUserRepository implements  UserRepository {
                 user.createdAt());
     }
 
+    @Override
+    public void verifyUser(Long userId) {
+        var query = """
+                UPDATE users SET is_email_verified = true
+                WHERE id = :userId""";
+
+        var params = new MapSqlParameterSource("userId", userId);
+
+        namedJdbcTemplate.update(query, params);
+    }
+
     private void insertUserRoles(Long userId, List<String> roles) {
         var insertSql = "INSERT INTO user_roles (user_id, role_id) VALUES (:userId, :roleId)";
 
