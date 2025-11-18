@@ -12,17 +12,16 @@ import java.time.Clock;
 class EmailConfig {
 
     @Bean
-    EmailFacade emailFacade(TokenVerificationService tokenVerificationService) {
-        return new EmailFacade(tokenVerificationService);
+    EmailFacade emailFacade(TokenVerificationService tokenVerificationService, UserFacade userFacade) {
+        return new EmailFacade(tokenVerificationService, userFacade);
     }
 
     @Bean
     TokenVerificationService verificationTokenService(EmailVerificationRepository emailVerificationRepository,
                                                       Clock clock,
-                                                      @Value("${verification.token.expiration}") long verificationTokenExpirationSec,
-                                                      UserFacade userFacade
+                                                      @Value("${verification.token.expiration}") long verificationTokenExpirationSec
     ) {
-        return new TokenVerificationService(emailVerificationRepository,clock, verificationTokenExpirationSec, userFacade);
+        return new TokenVerificationService(emailVerificationRepository,clock, verificationTokenExpirationSec);
     }
 
     @Bean

@@ -4,7 +4,6 @@ import com.google.common.hash.Hashing;
 import org.springframework.transaction.annotation.Transactional;
 import pl.bpiatek.linkshorteneruserservice.exception.ExpiredTokenException;
 import pl.bpiatek.linkshorteneruserservice.exception.InvalidTokenException;
-import pl.bpiatek.linkshorteneruserservice.user.UserFacade;
 
 import java.nio.charset.StandardCharsets;
 import java.time.Clock;
@@ -18,16 +17,13 @@ class TokenVerificationService {
     private final EmailVerificationRepository emailVerificationRepository;
     private final Clock clock;
     private final long verificationTokenExpirationSec;
-    private final UserFacade userFacade;
 
     TokenVerificationService(EmailVerificationRepository emailVerificationRepository,
                              Clock clock,
-                             long verificationTokenExpirationSec,
-                             UserFacade userFacade) {
+                             long verificationTokenExpirationSec) {
         this.emailVerificationRepository = emailVerificationRepository;
         this.clock = clock;
         this.verificationTokenExpirationSec = verificationTokenExpirationSec;
-        this.userFacade = userFacade;
     }
 
     String generateAndSaveToken(Long userId, String email) {
@@ -43,7 +39,7 @@ class TokenVerificationService {
     }
 
     @Transactional
-    void verifyToken(String rawToken) {
+    Long verifyToken(String rawToken) {
         var tokenHash = Hashing.sha256()
                 .hashString(rawToken, StandardCharsets.UTF_8)
                 .toString();
@@ -55,8 +51,8 @@ class TokenVerificationService {
             throw new ExpiredTokenException("Verification token has expired.");
         }
 
-        var userId = verification.userId();
-        userFacade.verifyUser(userId);
-        emailVerificationRepository.deleteByUserId(userId);
+        emailVerificationRepository.deleteByUserId(verification.userId());
+
+        return verification.userId();
     }
 }
