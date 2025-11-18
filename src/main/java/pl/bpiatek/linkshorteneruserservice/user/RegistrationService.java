@@ -5,7 +5,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
-import pl.bpiatek.linkshorteneruserservice.email.EmailFacade;
 import pl.bpiatek.linkshorteneruserservice.exception.UserAlreadyExistsException;
 
 import java.time.Clock;
@@ -20,15 +19,13 @@ class RegistrationService {
     private final PasswordEncoder passwordEncoder;
     private final Clock clock;
     private final ApplicationEventPublisher eventPublisher;
-    private final EmailFacade emailFacade;
 
     RegistrationService(UserRepository userRepository, PasswordEncoder passwordEncoder, Clock clock,
-                        ApplicationEventPublisher eventPublisher, EmailFacade emailFacade) {
+                        ApplicationEventPublisher eventPublisher) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.clock = clock;
         this.eventPublisher = eventPublisher;
-        this.emailFacade = emailFacade;
     }
 
     @Transactional
@@ -43,13 +40,9 @@ class RegistrationService {
         var savedUser = userRepository.save(user);
         log.info("Successfully registered user with ID: {}", savedUser.id());
 
-        var rawToken = emailFacade.generateAndSaveToken(savedUser.id(), email);
-        log.info("Saved verification token for user ID: {}", savedUser.id());
-
         var event = new UserRegisteredApplicationEvent(
                 String.valueOf(savedUser.id()),
-                savedUser.email(),
-                rawToken
+                savedUser.email()
         );
 
         eventPublisher.publishEvent(event);

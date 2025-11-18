@@ -49,9 +49,8 @@ class UserConfig {
     RegistrationService registrationService(UserRepository userRepository,
                                             PasswordEncoder passwordEncoder,
                                             Clock clock,
-                                            ApplicationEventPublisher eventPublisher,
-                                            EmailFacade emailFacade) {
-        return new RegistrationService(userRepository, passwordEncoder, clock, eventPublisher, emailFacade);
+                                            ApplicationEventPublisher eventPublisher) {
+        return new RegistrationService(userRepository, passwordEncoder, clock, eventPublisher);
     }
 
 
@@ -78,7 +77,8 @@ class UserConfig {
     }
 
     @Bean
-    UserLifecycleEventPublisher userLifecycleEventPublisher(UserRegisteredKafkaProducer userRegisteredKafkaProducer) {
-        return new UserLifecycleEventPublisher(userRegisteredKafkaProducer);
+    UserLifecycleEventPublisher userLifecycleEventPublisher(UserRegisteredKafkaProducer userRegisteredKafkaProducer,
+                                                            EmailFacade emailFacade) {
+        return new UserLifecycleEventPublisher(userRegisteredKafkaProducer, emailFacade);
     }
 }
