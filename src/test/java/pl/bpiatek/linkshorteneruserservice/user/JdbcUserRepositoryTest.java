@@ -7,7 +7,6 @@ import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
-import org.testcontainers.junit.jupiter.Testcontainers;
 import pl.bpiatek.linkshorteneruserservice.WithPostgres;
 
 import java.time.Instant;
@@ -17,7 +16,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static pl.bpiatek.linkshorteneruserservice.user.TestUser.builder;
 
-@Testcontainers
 @JdbcTest
 @Import({JdbcUserRepository.class, RoleCache.class, UserFixtures.class})
 @ActiveProfiles("test")

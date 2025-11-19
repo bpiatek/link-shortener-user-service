@@ -11,7 +11,6 @@ import pl.bpiatek.contracts.user.UserLifecycleEventProto.UserRegistered;
 
 import java.time.Clock;
 import java.util.UUID;
-import java.util.concurrent.ExecutionException;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
@@ -31,7 +30,7 @@ class UserRegisteredKafkaProducer {
         this.clock = clock;
     }
 
-    void sendUserRegisteredEvent(String userId, String email, String verificationToken) {
+    void sendUserRegisteredEvent(String userId, String email, String verificationUrl) {
         log.info("Preparing to send UserRegistered event for userId: {}", userId);
         var signature = userId + email;
         var eventId = UUID.nameUUIDFromBytes(signature.getBytes(UTF_8)).toString();
@@ -39,7 +38,7 @@ class UserRegisteredKafkaProducer {
         var payload = UserRegistered.newBuilder()
                 .setUserId(userId)
                 .setEmail(email)
-                .setVerificationToken(verificationToken)
+                .setVerificationUrl(verificationUrl)
                 .build();
 
         var now = clock.instant();
@@ -56,22 +55,19 @@ class UserRegisteredKafkaProducer {
         producerRecord.headers().add(new RecordHeader("trace-id", UUID.randomUUID().toString().getBytes(UTF_8)));
         producerRecord.headers().add(new RecordHeader("source", SOURCE_HEADER_VALUE.getBytes(UTF_8)));
 
-        try {
-            var result = kafkaTemplate.send(producerRecord).get();
-            log.info("Successfully published UserRegistered event for userId: {} to partition: {} offset: {}",
-                    userId,
-                    result.getRecordMetadata().partition(),
-                    result.getRecordMetadata().offset());
-
-        } catch (InterruptedException | ExecutionException e) {
-            log.error("Failed to publish UserRegistered event for userId: {}. Reason: {}",
-                    userId,
-                    e.getCause().getMessage());
-
-            if (e instanceof InterruptedException) {
-                Thread.currentThread().interrupt();
+        kafkaTemplate.send(producerRecord).whenComplete((result, ex) -> {
+            if (ex == null) {
+                log.info("Successfully published UserRegistered event for userId: {} to partition: {} offset: {}",
+                        userId,
+                        result.getRecordMetadata().partition(),
+                        result.getRecordMetadata().offset());
+            } else {
+                log.error("Failed to publish UserRegistered event for userId: {}. Reason: {}",
+                        userId,
+                        ex.getMessage(),
+                        ex);
             }
-        }
+        });
     }
 
     void sendPasswordResetRequestedEvent(/*...params...*/) {

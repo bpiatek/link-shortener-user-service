@@ -5,6 +5,7 @@ import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
@@ -43,6 +44,9 @@ class UserFacadeRegisterUserIT implements WithFullInfrastructure {
 
     @MockitoBean
     JwtKeyProvider jwtKeyProvider;
+
+    @Value("${app.verification-url}")
+    String appVerificationUrl;
 
     @DynamicPropertySource
     static void kafkaProperties(DynamicPropertyRegistry registry) {
@@ -103,7 +107,7 @@ class UserFacadeRegisterUserIT implements WithFullInfrastructure {
             var message = envelope.getUserRegistered();
             s.assertThat(message.getUserId()).isEqualTo(user.getId().toString());
             s.assertThat(message.getEmail()).isEqualTo(email);
-            s.assertThat(message.getVerificationToken()).isNotNull();
+            s.assertThat(message.getVerificationUrl()).contains(appVerificationUrl);
         });
     }
 

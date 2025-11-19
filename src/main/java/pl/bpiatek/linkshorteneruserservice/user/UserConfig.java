@@ -78,7 +78,9 @@ class UserConfig {
 
     @Bean
     UserLifecycleEventPublisher userLifecycleEventPublisher(UserRegisteredKafkaProducer userRegisteredKafkaProducer,
-                                                            EmailFacade emailFacade) {
-        return new UserLifecycleEventPublisher(userRegisteredKafkaProducer, emailFacade);
+                                                            EmailFacade emailFacade,
+                                                            @Value("${app.base-url}") String appBaseUrl,
+                                                            @Value("${app.verification-url}") String appVerificationUrl) {
+        return new UserLifecycleEventPublisher(userRegisteredKafkaProducer, emailFacade, appBaseUrl, appVerificationUrl);
     }
 }

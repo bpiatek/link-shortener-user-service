@@ -45,7 +45,10 @@ class JdbcEmailVerificationRepository implements  EmailVerificationRepository {
 
     @Override
     public Optional<EmailVerification> findByTokenHash(String tokenHash) {
-        var sql = "SELECT * FROM email_verifications WHERE token_hash = :tokenHash";
+        var sql = """
+            SELECT id, user_id, token_hash, expires_at, created_at
+            FROM email_verifications WHERE token_hash = :tokenHash""";
+
         var params = new MapSqlParameterSource().addValue("tokenHash", tokenHash);
 
         try {

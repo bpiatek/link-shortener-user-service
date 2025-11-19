@@ -13,10 +13,14 @@ class UserLifecycleEventPublisher {
 
     private final UserRegisteredKafkaProducer userRegisteredKafkaProducer;
     private final EmailFacade emailFacade;
+    private final String appBaseUrl;
+    private final String appVerificationUrl;
 
-    UserLifecycleEventPublisher(UserRegisteredKafkaProducer userRegisteredKafkaProducer, EmailFacade emailFacade) {
+    UserLifecycleEventPublisher(UserRegisteredKafkaProducer userRegisteredKafkaProducer, EmailFacade emailFacade, String appBaseUrl, String appVerificationUrl) {
         this.userRegisteredKafkaProducer = userRegisteredKafkaProducer;
         this.emailFacade = emailFacade;
+        this.appBaseUrl = appBaseUrl;
+        this.appVerificationUrl = appVerificationUrl;
     }
 
     @Async
@@ -27,12 +31,14 @@ class UserLifecycleEventPublisher {
                 event.email()
         );
 
+        var verificationUrl = appBaseUrl + appVerificationUrl + rawToken;
+
         log.info("Saved verification token for user ID: {}", event.userId());
 
         userRegisteredKafkaProducer.sendUserRegisteredEvent(
                 event.userId(),
                 event.email(),
-                rawToken
+                verificationUrl
         );
     }
 }

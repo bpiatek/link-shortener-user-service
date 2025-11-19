@@ -17,6 +17,7 @@ import java.security.interfaces.RSAPrivateKey;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneOffset;
+import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -42,7 +43,7 @@ class JwtServiceTest {
 
     private static final long ACCESS_TOKEN_EXPIRATION_MS = 3_600_000;
     private static final long REFRESH_TOKEN_EXPIRATION_MS = 86_400_000;
-    private static final Instant NOW = Instant.parse("2025-10-26T10:00:00Z");
+    private static final Instant NOW = Instant.now().truncatedTo(ChronoUnit.SECONDS);
     private static final Clock FIXED_CLOCK = Clock.fixed(NOW, ZoneOffset.UTC);
 
     private User testUser;

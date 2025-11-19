@@ -19,7 +19,7 @@ import java.util.Map;
 
 @Component
 @ActiveProfiles("test")
-class UserFixtures {
+public class UserFixtures {
 
     @Autowired
     private RoleCache roleCache;
@@ -34,7 +34,7 @@ class UserFixtures {
                 .usingGeneratedKeyColumns("id");
     }
 
-    TestUser aUser(TestUser user) {
+    public TestUser aUser(TestUser user) {
         var params = new MapSqlParameterSource()
                 .addValue("email", user.getEmail())
                 .addValue("password_hash", user.getPasswordHash())
@@ -51,7 +51,11 @@ class UserFixtures {
         return getUserByEmail(user.getEmail());
     }
 
-    TestUser getUserByEmail(String email) {
+    public TestUser aUser() {
+        return aUser(TestUser.builder().build());
+    }
+
+    public TestUser getUserByEmail(String email) {
         var sql = """
             SELECT u.id, u.email, u.password_hash, u.is_email_verified, u.created_at, r.name as role_name
             FROM users u
