@@ -2,6 +2,7 @@ package pl.bpiatek.linkshorteneruserservice.config;
 
 import io.confluent.kafka.serializers.protobuf.KafkaProtobufSerializer;
 import io.confluent.kafka.serializers.protobuf.KafkaProtobufSerializerConfig;
+import io.micrometer.observation.ObservationRegistry;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.boot.autoconfigure.kafka.KafkaProperties;
@@ -32,8 +33,13 @@ class KafkaConfig {
     }
 
     @Bean
-    KafkaTemplate<String, UserLifecycleEvent> enrichedClickEventKafkaTemplate() {
-        return new KafkaTemplate<>(userLifecycleEventProducerFactory());
+    KafkaTemplate<String, UserLifecycleEvent> enrichedClickEventKafkaTemplate(ObservationRegistry observationRegistry) {
+        KafkaTemplate<String, UserLifecycleEvent> template = new KafkaTemplate<>(userLifecycleEventProducerFactory());
+
+        template.setObservationEnabled(true);
+        template.setObservationRegistry(observationRegistry);
+
+        return template;
     }
 
     private Map<String, Object> baseProducerProperties() {
