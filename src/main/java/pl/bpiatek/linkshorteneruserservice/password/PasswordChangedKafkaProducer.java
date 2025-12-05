@@ -32,8 +32,7 @@ class PasswordChangedKafkaProducer {
 
     void sendPasswordChangedEvent(String userId, String email) {
         log.info("Preparing to send PasswordChanged event for userId: {}", userId);
-        var signature = userId + email;
-        var eventId = UUID.nameUUIDFromBytes(signature.getBytes(UTF_8)).toString();
+        var eventId = UUID.randomUUID().toString();
 
         var payload = UserLifecycleEventProto.UserPasswordChanged.newBuilder()
                 .setUserId(userId)
@@ -50,8 +49,9 @@ class PasswordChangedKafkaProducer {
                 .setUserPasswordChanged(payload)
                 .build();
 
-        var producerRecord = new ProducerRecord<>(topicName, eventId, event);
-        producerRecord.headers().add(new RecordHeader("trace-id", UUID.randomUUID().toString().getBytes(UTF_8)));
+        var producerRecord = new ProducerRecord<>(topicName, userId, event);
+        //TODO add later idempotency-key that you get from client calling /reset-password
+        producerRecord.headers().add(new RecordHeader("event-id", eventId.getBytes(UTF_8)));
         producerRecord.headers().add(new RecordHeader("source", SOURCE_HEADER_VALUE.getBytes(UTF_8)));
 
         kafkaTemplate.send(producerRecord).whenComplete((result, ex) -> {
