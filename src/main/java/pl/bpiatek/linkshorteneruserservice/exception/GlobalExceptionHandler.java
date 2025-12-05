@@ -4,6 +4,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -63,6 +64,24 @@ class GlobalExceptionHandler {
         log.warn("User registration failed: {}", ex.getMessage());
 
         return new ResponseEntity<>(apiError, CONFLICT);
+    }
+
+    @ExceptionHandler(HttpMediaTypeNotSupportedException.class)
+    public ResponseEntity<ApiError> handleUnsupportedMediaType(
+            HttpMediaTypeNotSupportedException ex,
+            HttpServletRequest request) {
+        log.error("Unsupported media type on request [{}]: {}", request.getRequestURI(), ex.getMessage(), ex);
+
+        var apiError = new ApiError(
+                "/errors/unsupported-media-type",
+                "Unsupported Media Type",
+                BAD_REQUEST.value(),
+                "The provided media type is not supported.",
+                request.getRequestURI(),
+                null
+        );
+
+        return  new ResponseEntity<>(apiError, BAD_REQUEST);
     }
 
     @ExceptionHandler(Exception.class)
