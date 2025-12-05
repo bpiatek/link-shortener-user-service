@@ -1,6 +1,7 @@
 package pl.bpiatek.linkshorteneruserservice.user;
 
 import com.google.protobuf.Timestamp;
+import io.micrometer.context.ContextSnapshotFactory;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.header.internals.RecordHeader;
 import org.slf4j.Logger;
@@ -17,6 +18,8 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 class UserRegisteredKafkaProducer {
 
     private static final Logger log = LoggerFactory.getLogger(UserRegisteredKafkaProducer.class);
+
+    private static final ContextSnapshotFactory snapshotFactory = ContextSnapshotFactory.builder().build();
     private static final String SOURCE_HEADER_VALUE = "user-service";
 
     private final KafkaTemplate<String, UserLifecycleEvent> kafkaTemplate;
@@ -55,17 +58,21 @@ class UserRegisteredKafkaProducer {
         producerRecord.headers().add(new RecordHeader("event-id", eventId.getBytes(UTF_8)));
         producerRecord.headers().add(new RecordHeader("source", SOURCE_HEADER_VALUE.getBytes(UTF_8)));
 
+        var snapshot = snapshotFactory.captureAll();
+
         kafkaTemplate.send(producerRecord).whenComplete((result, ex) -> {
-            if (ex == null) {
-                log.info("Successfully published UserRegistered event for userId: {} to partition: {} offset: {}",
-                        userId,
-                        result.getRecordMetadata().partition(),
-                        result.getRecordMetadata().offset());
-            } else {
-                log.error("Failed to publish UserRegistered event for userId: {}. Reason: {}",
-                        userId,
-                        ex.getMessage(),
-                        ex);
+            try (var scope = snapshot.setThreadLocals()) {
+                if (ex == null) {
+                    log.info("Successfully published UserRegistered event for userId: {} to partition: {} offset: {}",
+                            userId,
+                            result.getRecordMetadata().partition(),
+                            result.getRecordMetadata().offset());
+                } else {
+                    log.error("Failed to publish UserRegistered event for userId: {}. Reason: {}",
+                            userId,
+                            ex.getMessage(),
+                            ex);
+                }
             }
         });
     }

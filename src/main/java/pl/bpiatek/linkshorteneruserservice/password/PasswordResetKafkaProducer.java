@@ -1,7 +1,6 @@
 package pl.bpiatek.linkshorteneruserservice.password;
 
 import com.google.protobuf.Timestamp;
-import io.micrometer.context.ContextSnapshot;
 import io.micrometer.context.ContextSnapshotFactory;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.header.internals.RecordHeader;
