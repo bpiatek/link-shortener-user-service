@@ -7,16 +7,16 @@ import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
 import pl.bpiatek.linkshorteneruserservice.email.EmailFacade;
 
-class UserLifecycleEventPublisher {
+class UserRegisteredEventPublisher {
 
-    private static final Logger log = LoggerFactory.getLogger(UserLifecycleEventPublisher.class);
+    private static final Logger log = LoggerFactory.getLogger(UserRegisteredEventPublisher.class);
 
     private final UserRegisteredKafkaProducer userRegisteredKafkaProducer;
     private final EmailFacade emailFacade;
     private final String appBaseUrl;
     private final String appVerificationUrl;
 
-    UserLifecycleEventPublisher(UserRegisteredKafkaProducer userRegisteredKafkaProducer, EmailFacade emailFacade, String appBaseUrl, String appVerificationUrl) {
+    UserRegisteredEventPublisher(UserRegisteredKafkaProducer userRegisteredKafkaProducer, EmailFacade emailFacade, String appBaseUrl, String appVerificationUrl) {
         this.userRegisteredKafkaProducer = userRegisteredKafkaProducer;
         this.emailFacade = emailFacade;
         this.appBaseUrl = appBaseUrl;
@@ -26,8 +26,8 @@ class UserLifecycleEventPublisher {
     @Async
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     void handleUserRegisteredEvent(UserRegisteredApplicationEvent event) {
-        var rawToken = emailFacade.generateAndSaveToken(
-                Long.valueOf(event.userId()),
+        var rawToken = emailFacade.generateAndSaveEmailVerificationToken(
+                event.userId(),
                 event.email()
         );
 

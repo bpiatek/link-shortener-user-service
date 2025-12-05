@@ -11,12 +11,15 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import pl.bpiatek.linkshorteneruserservice.api.dto.ForgotPasswordRequest;
 import pl.bpiatek.linkshorteneruserservice.api.dto.LoginRequest;
 import pl.bpiatek.linkshorteneruserservice.api.dto.LoginResponse;
 import pl.bpiatek.linkshorteneruserservice.api.dto.RegisterRequest;
+import pl.bpiatek.linkshorteneruserservice.api.dto.ResetPasswordRequest;
 import pl.bpiatek.linkshorteneruserservice.email.EmailFacade;
 import pl.bpiatek.linkshorteneruserservice.exception.ExpiredTokenException;
 import pl.bpiatek.linkshorteneruserservice.exception.InvalidTokenException;
+import pl.bpiatek.linkshorteneruserservice.password.PasswordResetTokenFacade;
 import pl.bpiatek.linkshorteneruserservice.user.UserFacade;
 
 import java.net.URI;
@@ -29,12 +32,17 @@ import static org.springframework.http.HttpStatus.CREATED;
 class AuthController {
 
     private final Logger log = LoggerFactory.getLogger(AuthController.class);
+
     private final UserFacade userFacade;
     private final EmailFacade emailFacade;
+    private final PasswordResetTokenFacade passwordResetTokenFacade;
 
-    private AuthController(UserFacade userFacade, EmailFacade emailFacade) {
+    private AuthController(UserFacade userFacade,
+                           EmailFacade emailFacade,
+                           PasswordResetTokenFacade passwordResetTokenFacade) {
         this.userFacade = userFacade;
         this.emailFacade = emailFacade;
+        this.passwordResetTokenFacade = passwordResetTokenFacade;
     }
 
     @PostMapping("/register")
@@ -68,5 +76,17 @@ class AuthController {
                     .location(URI.create("/")) //TODO later failure address
                     .build();
         }
+    }
+
+    @PostMapping("/forgot-password")
+    ResponseEntity<Void> forgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {
+        passwordResetTokenFacade.requestPasswordReset(request.email());
+        return ResponseEntity.accepted().build();
+    }
+
+    @PostMapping("/reset-password")
+    ResponseEntity<Void> resetPassword(@RequestBody ResetPasswordRequest request) {
+        passwordResetTokenFacade.resetPassword(request.token(), request.newPassword());
+        return ResponseEntity.ok().build();
     }
 }

@@ -6,4 +6,5 @@ interface UserRepository {
     Optional<User> findByEmail(String email);
     User save(User user);
     void verifyUser(Long userId);
+    void updatePassword(Long userId, String newPassword);
 }

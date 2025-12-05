@@ -77,6 +77,19 @@ class JdbcUserRepository implements  UserRepository {
         namedJdbcTemplate.update(query, params);
     }
 
+    @Override
+    public void updatePassword(Long userId, String newPassword) {
+        var sql = """
+                UPDATE users SET password_hash = :newPassword
+                WHERE id = :userId""";
+
+        var params = new MapSqlParameterSource()
+                .addValue("userId", userId)
+                .addValue("newPassword", newPassword);
+
+        namedJdbcTemplate.update(sql, params);
+    }
+
     private void insertUserRoles(Long userId, List<String> roles) {
         var insertSql = "INSERT INTO user_roles (user_id, role_id) VALUES (:userId, :roleId)";
 

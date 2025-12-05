@@ -13,8 +13,8 @@ public class EmailFacade {
         this.userFacade = userFacade;
     }
 
-    public String generateAndSaveToken(Long userId, String email) {
-        return tokenVerificationService.generateAndSaveToken(userId, email);
+    public String generateAndSaveEmailVerificationToken(String userId, String email) {
+        return tokenVerificationService.generateAndSaveToken(Long.valueOf(userId), email);
     }
 
     @Transactional

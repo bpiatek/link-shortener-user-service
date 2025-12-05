@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.5.5</version>
+        <version>3.5.8</version>
         <relativePath/>
     </parent>
 
@@ -35,7 +35,7 @@
         <jsonwebtoken.version>0.13.0</jsonwebtoken.version>
         <nimbus-jose-jwt.version>10.5</nimbus-jose-jwt.version>
         <confluent.version>8.0.0</confluent.version>
-        <link-shortener-contracts.version>0.0.9</link-shortener-contracts.version>
+        <link-shortener-contracts.version>0.0.12</link-shortener-contracts.version>
         <logcaptor.version>2.12.1</logcaptor.version>
     </properties>
 
@@ -51,16 +51,6 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.springframework.boot</groupId>
-                    <artifactId>spring-boot-starter-tomcat</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-undertow</artifactId>
         </dependency>
 
         <!-- Database -->
@@ -128,6 +118,14 @@
         <groupId>net.logstash.logback</groupId>
             <artifactId>logstash-logback-encoder</artifactId>
             <version>${logstash-logback-encoder.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-tracing-bridge-otel</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.opentelemetry</groupId>
+            <artifactId>opentelemetry-exporter-otlp</artifactId>
         </dependency>
 
         <!--        KAFKA       -->

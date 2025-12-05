@@ -1,4 +1,4 @@
-package pl.bpiatek.linkshorteneruserservice.user;
+package pl.bpiatek.linkshorteneruserservice.password;
 
 import com.google.protobuf.Timestamp;
 import org.apache.kafka.clients.producer.ProducerRecord;
@@ -6,38 +6,39 @@ import org.apache.kafka.common.header.internals.RecordHeader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
+import pl.bpiatek.contracts.user.UserLifecycleEventProto;
 import pl.bpiatek.contracts.user.UserLifecycleEventProto.UserLifecycleEvent;
-import pl.bpiatek.contracts.user.UserLifecycleEventProto.UserRegistered;
 
 import java.time.Clock;
 import java.util.UUID;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
-class UserRegisteredKafkaProducer {
+class PasswordResetKafkaProducer {
 
-    private static final Logger log = LoggerFactory.getLogger(UserRegisteredKafkaProducer.class);
+    private static final Logger log = LoggerFactory.getLogger(PasswordResetKafkaProducer.class);
+
     private static final String SOURCE_HEADER_VALUE = "user-service";
 
     private final KafkaTemplate<String, UserLifecycleEvent> kafkaTemplate;
     private final String topicName;
     private final Clock clock;
 
-    UserRegisteredKafkaProducer(KafkaTemplate<String, UserLifecycleEvent> kafkaTemplate,
-                                String topicName, Clock clock) {
+    PasswordResetKafkaProducer(KafkaTemplate<String, UserLifecycleEvent> kafkaTemplate, String topicName, Clock clock) {
         this.kafkaTemplate = kafkaTemplate;
         this.topicName = topicName;
         this.clock = clock;
     }
 
-    void sendUserRegisteredEvent(String userId, String email, String verificationUrl) {
-        log.info("Preparing to send UserRegistered event for userId: {}", userId);
+    void sendPasswordResetRequestedEvent(String userId, String email, String resetUrl) {
+        log.info("Preparing to send PasswordReset event for userId: {}", userId);
+
         var eventId = UUID.randomUUID().toString();
 
-        var payload = UserRegistered.newBuilder()
+        var payload = UserLifecycleEventProto.PasswordResetRequested.newBuilder()
                 .setUserId(userId)
                 .setEmail(email)
-                .setVerificationUrl(verificationUrl)
+                .setResetUrl(resetUrl)
                 .build();
 
         var now = clock.instant();
@@ -47,7 +48,7 @@ class UserRegisteredKafkaProducer {
                         .setSeconds(now.getEpochSecond())
                         .setNanos(now.getNano())
                         .build())
-                .setUserRegistered(payload)
+                .setPasswordResetRequested(payload)
                 .build();
 
         var producerRecord = new ProducerRecord<>(topicName, userId, event);
@@ -57,12 +58,12 @@ class UserRegisteredKafkaProducer {
 
         kafkaTemplate.send(producerRecord).whenComplete((result, ex) -> {
             if (ex == null) {
-                log.info("Successfully published UserRegistered event for userId: {} to partition: {} offset: {}",
+                log.info("Successfully published PasswordReset event for userId: {} to partition: {} offset: {}",
                         userId,
                         result.getRecordMetadata().partition(),
                         result.getRecordMetadata().offset());
             } else {
-                log.error("Failed to publish UserRegistered event for userId: {}. Reason: {}",
+                log.error("Failed to publish PasswordReset event for userId: {}. Reason: {}",
                         userId,
                         ex.getMessage(),
                         ex);

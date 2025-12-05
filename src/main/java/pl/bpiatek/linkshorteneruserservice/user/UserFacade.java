@@ -2,8 +2,10 @@ package pl.bpiatek.linkshorteneruserservice.user;
 
 import org.springframework.transaction.annotation.Transactional;
 import pl.bpiatek.linkshorteneruserservice.api.dto.LoginResponse;
+import pl.bpiatek.linkshorteneruserservice.dto.UserDto;
 
 import java.security.interfaces.RSAPublicKey;
+import java.util.Optional;
 
 public class UserFacade {
 
@@ -35,5 +37,14 @@ public class UserFacade {
 
     public void verifyUser(Long userId) {
         userRepository.verifyUser(userId);
+    }
+
+    public Optional<UserDto> findByEmail(String email) {
+        var optionalUser = userRepository.findByEmail(email);
+        return optionalUser.map(user -> new UserDto(user.id().toString(), user.email()));
+    }
+
+    public void updateUserPassword(Long userId, String newPassword) {
+        userRepository.updatePassword(userId, newPassword);
     }
 }
