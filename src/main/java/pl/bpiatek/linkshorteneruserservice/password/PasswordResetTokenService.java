@@ -36,7 +36,7 @@ class PasswordResetTokenService {
         var tokenHash = Hashing.sha256().hashString(rawToken, UTF_8).toString();
 
         var token = repository.findByTokenHash(tokenHash)
-                .orElseThrow(() -> new InvalidTokenException("Invalid reset token."));
+                .orElseThrow(() -> new InvalidTokenException("Invalid reset token. " + rawToken));
 
         if (token.expiresAt().isBefore(clock.instant())) {
             throw new ExpiredTokenException("Reset token has expired.");

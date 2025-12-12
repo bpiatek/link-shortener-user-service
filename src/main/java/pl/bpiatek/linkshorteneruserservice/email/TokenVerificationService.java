@@ -5,7 +5,6 @@ import org.springframework.transaction.annotation.Transactional;
 import pl.bpiatek.linkshorteneruserservice.exception.ExpiredTokenException;
 import pl.bpiatek.linkshorteneruserservice.exception.InvalidTokenException;
 
-import java.nio.charset.StandardCharsets;
 import java.time.Clock;
 import java.util.UUID;
 
@@ -29,7 +28,7 @@ class TokenVerificationService {
     String generateAndSaveToken(Long userId, String email) {
         var rawToken = UUID.nameUUIDFromBytes(email.getBytes(UTF_8)).toString();
         var tokenHash = Hashing.sha256()
-                .hashString(rawToken, StandardCharsets.UTF_8)
+                .hashString(rawToken, UTF_8)
                 .toString();
 
         var expiresAt = clock.instant().plus(verificationTokenExpirationSec, SECONDS);
@@ -41,7 +40,7 @@ class TokenVerificationService {
     @Transactional
     Long verifyToken(String rawToken) {
         var tokenHash = Hashing.sha256()
-                .hashString(rawToken, StandardCharsets.UTF_8)
+                .hashString(rawToken, UTF_8)
                 .toString();
 
         var verification = emailVerificationRepository.findByTokenHash(tokenHash)

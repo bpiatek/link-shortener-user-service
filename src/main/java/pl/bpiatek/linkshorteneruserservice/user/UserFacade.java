@@ -40,8 +40,13 @@ public class UserFacade {
     }
 
     public Optional<UserDto> findByEmail(String email) {
-        var optionalUser = userRepository.findByEmail(email);
-        return optionalUser.map(user -> new UserDto(user.id().toString(), user.email()));
+        return userRepository.findByEmail(email)
+                .map(user -> new UserDto(user.id().toString(), user.email()));
+    }
+
+    public Optional<UserDto> findById(String id) {
+        return userRepository.findById(id)
+                .map(user -> new UserDto(user.id().toString(), user.email()));
     }
 
     public void updateUserPassword(Long userId, String newPassword) {

@@ -43,6 +43,24 @@ class JdbcUserRepository implements  UserRepository {
     }
 
     @Override
+    public Optional<User> findById(String id) {
+        var sql = """
+            SELECT u.id, u.email, u.password_hash, u.is_email_verified, u.created_at, r.name as role_name
+            FROM users u
+            LEFT JOIN user_roles ur ON u.id = ur.user_id
+            LEFT JOIN roles r ON ur.role_id = r.id
+            WHERE u.id = :id
+            """;
+
+        try {
+            var user = namedJdbcTemplate.query(sql, Map.of("id", Long.valueOf(id)), new UserWithRolesExtractor());
+            return Optional.ofNullable(user);
+        } catch (EmptyResultDataAccessException e) {
+            return Optional.empty();
+        }
+    }
+
+    @Override
     public User save(User user) {
         var params = new MapSqlParameterSource()
                 .addValue("email", user.email())

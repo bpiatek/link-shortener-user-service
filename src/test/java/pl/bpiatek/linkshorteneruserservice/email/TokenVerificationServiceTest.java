@@ -49,13 +49,11 @@ class TokenVerificationServiceTest {
         var generatedToken = service.generateAndSaveToken(userId, email);
 
         // then
-        // what was saved to the DB
         var hashCaptor = ArgumentCaptor.forClass(String.class);
         var timeCaptor = ArgumentCaptor.forClass(Instant.class);
 
         verify(emailVerificationRepository).save(eq(userId), hashCaptor.capture(), timeCaptor.capture());
 
-        // the saved data is correct
         assertThat(hashCaptor.getValue()).isEqualTo(hash(generatedToken));
         assertThat(timeCaptor.getValue()).isEqualTo(NOW.plusSeconds(EXPIRATION_SEC));
     }

@@ -2,7 +2,6 @@ package pl.bpiatek.linkshorteneruserservice.password;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
 
@@ -19,7 +18,6 @@ class PasswordEventPublisher {
         this.passwordChangedKafkaProducer = passwordChangedKafkaProducer;
     }
 
-    @Async
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     void handlePasswordResetEvent(PasswordResetApplicationEvent event) {
         log.info("Publishing PasswordReset event for user ID: {}", event.userId());
@@ -30,7 +28,6 @@ class PasswordEventPublisher {
         );
     }
 
-    @Async
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     void handlePasswordUpdatedEvent(PasswordChangedApplicationEvent event) {
         log.info("Publishing PasswordUpdated event for user ID: {}", event.userId());

@@ -24,6 +24,10 @@ class JwtKeyProvider {
     private static final Logger log = LoggerFactory.getLogger(JwtKeyProvider.class);
     private final KeyPair keyPair;
 
+    JwtKeyProvider(KeyPair keyPair) {
+        this.keyPair = keyPair;
+    }
+
     JwtKeyProvider(String keyFilePath) {
         this.keyPair = loadRsaKeyPairFromVaultFile(keyFilePath);
     }

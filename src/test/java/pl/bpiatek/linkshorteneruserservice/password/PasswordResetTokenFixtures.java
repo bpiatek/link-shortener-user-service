@@ -1,5 +1,6 @@
 package pl.bpiatek.linkshorteneruserservice.password;
 
+import com.google.common.hash.Hashing;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.ResultSetExtractor;
@@ -8,12 +9,13 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Component;
 import org.springframework.test.context.ActiveProfiles;
-import pl.bpiatek.linkshorteneruserservice.user.UserFixtures;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.Map;
+
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 @Component
 @ActiveProfiles("test")
@@ -34,9 +36,10 @@ public class PasswordResetTokenFixtures {
     }
 
     public TestPasswordResetToken aPasswordResetToken(TestPasswordResetToken token) {
+        var tokenHash = Hashing.sha256().hashString(token.getToken(), UTF_8).toString();
         var params = new MapSqlParameterSource()
                 .addValue("user_id", token.getUserId())
-                .addValue("token_hash", token.getTokenHash())
+                .addValue("token_hash", tokenHash)
                 .addValue("expires_at", Timestamp.from(token.getExpiresAt()))
                 .addValue("created_at", Timestamp.from(token.getCreatedAt()));
 

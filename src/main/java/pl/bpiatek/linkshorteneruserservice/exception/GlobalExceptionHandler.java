@@ -95,7 +95,7 @@ class GlobalExceptionHandler {
                 "/errors/internal-server-error",
                 "Internal Server Error",
                 INTERNAL_SERVER_ERROR.value(),
-                "An unexpected internal error occurred. Please try again later.",
+                "An unexpected internal error occurred: " + ex.getMessage() + ". Please try again later.",
                 request.getRequestURI(),
                 null
         );

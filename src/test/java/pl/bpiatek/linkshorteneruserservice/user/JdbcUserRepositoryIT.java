@@ -1,13 +1,7 @@
 package pl.bpiatek.linkshorteneruserservice.user;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
-import org.springframework.context.annotation.Import;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.test.context.ActiveProfiles;
-import pl.bpiatek.linkshorteneruserservice.WithPostgres;
 
 import java.time.Instant;
 import java.util.List;
@@ -16,25 +10,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static pl.bpiatek.linkshorteneruserservice.user.TestUser.builder;
 
-@JdbcTest
-@Import({JdbcUserRepository.class, RoleCache.class, UserFixtures.class})
-@ActiveProfiles("test")
-class JdbcUserRepositoryTest implements WithPostgres {
+class JdbcUserRepositoryIT extends IntegrationTest {
 
     @Autowired
     UserRepository userRepository;
 
     @Autowired
-    JdbcTemplate jdbcTemplate;
-
-    @Autowired
     UserFixtures userFixtures;
-
-    @AfterEach
-    void cleanup() {
-        jdbcTemplate.update("DELETE FROM user_roles");
-        jdbcTemplate.update("DELETE FROM users");
-    }
 
     @Test
     void shouldSaveUser() {

@@ -1,31 +1,16 @@
 package pl.bpiatek.linkshorteneruserservice.email;
 
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Import;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.test.context.ActiveProfiles;
-import pl.bpiatek.linkshorteneruserservice.WithPostgres;
-import pl.bpiatek.linkshorteneruserservice.user.RoleCacheProvider;
+import pl.bpiatek.linkshorteneruserservice.user.IntegrationTest;
 import pl.bpiatek.linkshorteneruserservice.user.UserFixtures;
 
-import java.time.Clock;
-import java.time.Instant;
-import java.time.ZoneId;
-import java.time.temporal.ChronoUnit;
-
+import static java.time.temporal.ChronoUnit.HOURS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
-@JdbcTest
-@Import({JdbcEmailVerificationRepository.class, EmailVerificationFixtures.class, UserFixtures.class, RoleCacheProvider.class})
-@ActiveProfiles("test")
-class JdbcEmailVerificationRepositoryTest implements WithPostgres {
+class JdbcEmailVerificationRepositoryTest extends IntegrationTest {
 
     @Autowired
     private JdbcEmailVerificationRepository repository;
@@ -36,43 +21,24 @@ class JdbcEmailVerificationRepositoryTest implements WithPostgres {
     @Autowired
     private UserFixtures userFixtures;
 
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
-
-    private static final Instant NOW = Instant.parse("2024-01-01T12:00:00Z");
-
-    @TestConfiguration
-    static class TestConfig {
-        @Bean
-        Clock clock() {
-            return Clock.fixed(NOW, ZoneId.of("UTC"));
-        }
-    }
-
-    @BeforeEach
-    void setUp() {
-        jdbcTemplate.execute("TRUNCATE TABLE email_verifications CASCADE");
-        jdbcTemplate.execute("TRUNCATE TABLE users CASCADE");
-    }
-
     @Test
     void shouldSaveNewVerification() {
         // given
         var user = userFixtures.aUser();
         var tokenHash = "hash-123";
-        var expiresAt = NOW.plus(1, ChronoUnit.HOURS);
+        var expiresAt = DEFAULT_NOW.plus(1, HOURS);
 
         // when
         repository.save(user.getId(), tokenHash, expiresAt);
 
         // then
-        var result = emailFixtures.getEmailVerificationByTokenHash(tokenHash);
+        var result = emailFixtures.getEmailVerificationByUserId(user.getId());
         assertThat(result).isNotNull();
         assertSoftly(s -> {
             s.assertThat(result.getUserId()).isEqualTo(user.getId());
             s.assertThat(result.getTokenHash()).isEqualTo(tokenHash);
             s.assertThat(result.getExpiresAt()).isEqualTo(expiresAt);
-            s.assertThat(result.getCreatedAt()).isEqualTo(NOW);
+            s.assertThat(result.getCreatedAt()).isEqualTo(DEFAULT_NOW);
         });
     }
 
@@ -80,56 +46,56 @@ class JdbcEmailVerificationRepositoryTest implements WithPostgres {
     void shouldUpdateExistingVerificationOnConflict() {
         // given
         var user = userFixtures.aUser();
-        emailFixtures.anEmailVerification(
-                TestEmailVerification.builder()
-                        .userId(user.getId())
-                        .tokenHash("old-hash")
-                        .expiresAt(NOW.plus(1, ChronoUnit.HOURS))
-                        .createdAt(NOW)
-                        .build());
+        var oldRawToken = "old-raw-token";
 
-        var newTokenHash = "new-hash-456";
-        var newExpiresAt = NOW.plus(2, ChronoUnit.HOURS);
+        var initialData = TestEmailVerification.builder()
+                .userId(user.getId())
+                .rawToken(oldRawToken)
+                .createdAt(DEFAULT_NOW)
+                .expiresAt(DEFAULT_NOW.plus(1, HOURS))
+                .build();
+
+        var verification = emailFixtures.anEmailVerification(initialData);
+
+        var newHashToken = "new-hash-token-456";
+        var newExpiresAt = DEFAULT_NOW.plus(2, HOURS);
 
         // when
-        repository.save(user.getId(), newTokenHash, newExpiresAt);
+        repository.save(user.getId(), newHashToken, newExpiresAt);
 
         // then
-        var result = emailFixtures.getEmailVerificationByTokenHash(newTokenHash);
+        var result = emailFixtures.getEmailVerificationByUserId(user.getId());
 
         assertThat(result).isNotNull();
         assertSoftly(s -> {
             s.assertThat(result.getUserId()).isEqualTo(user.getId());
-            s.assertThat(result.getTokenHash()).isEqualTo(newTokenHash);
+            s.assertThat(result.getTokenHash()).isEqualTo(newHashToken);
             s.assertThat(result.getExpiresAt()).isEqualTo(newExpiresAt);
-            s.assertThat(result.getCreatedAt()).isEqualTo(NOW);
+            s.assertThat(result.getCreatedAt()).isEqualTo(DEFAULT_NOW);
+            s.assertThat(emailFixtures.getEmailVerificationByTokenHash(verification.getTokenHash())).isNull();
         });
-
-        // old hash is gone
-        assertThat(emailFixtures.getEmailVerificationByTokenHash("old-hash")).isNull();
     }
 
     @Test
     void shouldFindVerificationByTokenHash() {
         // given
         var user = userFixtures.aUser();
-        var tokenHash = "unique-hash";
-        emailFixtures.anEmailVerification(
+        var verification = emailFixtures.anEmailVerification(
                 TestEmailVerification.builder()
                         .userId(user.getId())
-                        .tokenHash(tokenHash)
-                        .expiresAt(NOW.plus(1, ChronoUnit.HOURS))
-                        .createdAt(NOW)
+                        .tokenHash("raw-token")
+                        .expiresAt(DEFAULT_NOW.plus(1, HOURS))
+                        .createdAt(DEFAULT_NOW)
                         .build());
 
         // when
-        var result = repository.findByTokenHash(tokenHash);
+        var result = repository.findByTokenHash(verification.getTokenHash());
 
         // then
         assertThat(result).isPresent();
         assertSoftly(s -> {
             s.assertThat(result.get().userId()).isEqualTo(user.getId());
-            s.assertThat(result.get().tokenHash()).isEqualTo(tokenHash);
+            s.assertThat(result.get().tokenHash()).isEqualTo(verification.getTokenHash());
         });
     }
 
@@ -151,8 +117,8 @@ class JdbcEmailVerificationRepositoryTest implements WithPostgres {
                 TestEmailVerification.builder()
                         .userId(user.getId())
                         .tokenHash(tokenHash)
-                        .expiresAt(NOW.plus(1, ChronoUnit.HOURS))
-                        .createdAt(NOW)
+                        .expiresAt(DEFAULT_NOW.plus(1, HOURS))
+                        .createdAt(DEFAULT_NOW)
                         .build());
 
         // when

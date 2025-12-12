@@ -36,7 +36,7 @@ class EmailVerificationFixtures {
 
         userInsert.execute(params);
 
-        return getEmailVerificationByTokenHash(emailVerification.getTokenHash());
+        return getEmailVerificationByUserId(emailVerification.getUserId());
     }
 
     TestEmailVerification getEmailVerificationByTokenHash(String tokenHash) {
@@ -45,6 +45,20 @@ class EmailVerificationFixtures {
             FROM email_verifications WHERE token_hash = :tokenHash""";
 
         var params = new MapSqlParameterSource().addValue("tokenHash", tokenHash);
+
+        try {
+            return namedParameterJdbcTemplate.query(sql, params, new TestEmailVerificationExtractor());
+        } catch (EmptyResultDataAccessException e) {
+            return null;
+        }
+    }
+
+    TestEmailVerification getEmailVerificationByUserId(Long userId) {
+        var sql = """
+            SELECT id, user_id, token_hash, expires_at, created_at
+            FROM email_verifications WHERE user_id = :userId""";
+
+        var params = new MapSqlParameterSource().addValue("userId", userId);
 
         try {
             return namedParameterJdbcTemplate.query(sql, params, new TestEmailVerificationExtractor());

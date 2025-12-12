@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -53,8 +54,6 @@ class UserConfig {
         return new RegistrationService(userRepository, passwordEncoder, clock, eventPublisher);
     }
 
-
-
     @Bean
     JwtService jwtService(@Value("${app.jwt.access-token.expiration}") long accessTokenExpiration,
                           @Value("${app.jwt.refresh-token.expiration}") long refreshTokenExpiration,
@@ -65,6 +64,7 @@ class UserConfig {
     }
 
     @Bean
+    @Profile("!test")
     JwtKeyProvider jwtKeyProvider(@Value("${vault.secrets.path:/vault/secrets/jwtkeyjson}") String keyFilePath) {
         return new JwtKeyProvider(keyFilePath);
     }

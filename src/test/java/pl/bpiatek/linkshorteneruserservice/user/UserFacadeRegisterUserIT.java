@@ -1,70 +1,29 @@
 package pl.bpiatek.linkshorteneruserservice.user;
 
 
-import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.context.annotation.Bean;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.kafka.annotation.KafkaListener;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.security.authentication.BadCredentialsException;
 import pl.bpiatek.contracts.user.UserLifecycleEventProto.UserLifecycleEvent;
-import pl.bpiatek.linkshorteneruserservice.WithFullInfrastructure;
 
+import java.security.NoSuchAlgorithmException;
 import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
-@SpringBootTest
-@ActiveProfiles("test")
-class UserFacadeRegisterUserIT implements WithFullInfrastructure {
+class UserFacadeRegisterUserIT extends IntegrationTest {
 
     @Autowired
     UserFacade userFacade;
 
     @Autowired
-    JdbcTemplate jdbcTemplate;
-
-    @Autowired
     UserFixtures userFixtures;
-
-    @Autowired
-    TestKafkaConsumer<UserLifecycleEvent> testConsumer;
-
-    @MockitoBean
-    LoginService loginService;
-
-    @MockitoBean
-    JwtKeyProvider jwtKeyProvider;
 
     @Value("${app.verification-url}")
     String appVerificationUrl;
-
-    @DynamicPropertySource
-    static void kafkaProperties(DynamicPropertyRegistry registry) {
-        var eventType = "pl.bpiatek.contracts.user.UserLifecycleEventProto$UserLifecycleEvent";
-        registry.add("spring.kafka.producer.properties.specific.protobuf.value.type",
-                () -> eventType);
-        registry.add("spring.kafka.consumer.properties.specific.protobuf.value.type",
-                () -> eventType);
-        registry.add("spring.kafka.bootstrap-servers", redpanda::getBootstrapServers);
-    }
-
-    @AfterEach
-    void cleanup() {
-        jdbcTemplate.update("DELETE FROM user_roles");
-        jdbcTemplate.update("DELETE FROM email_verifications");
-        jdbcTemplate.update("DELETE FROM users");
-        testConsumer.reset();
-    }
 
     @Test
     void shouldRegisterUser() {
@@ -94,7 +53,7 @@ class UserFacadeRegisterUserIT implements WithFullInfrastructure {
         userFacade.register(email, password);
 
         // then
-        var record = testConsumer.awaitRecord(5, TimeUnit.SECONDS);
+        var record = testUserLifecycleEventConsumer.awaitRecord(5, TimeUnit.SECONDS);
         assertThat(record).isNotNull();
 
         var user = userFixtures.getUserByEmail(email);
@@ -111,20 +70,28 @@ class UserFacadeRegisterUserIT implements WithFullInfrastructure {
         });
     }
 
-    @TestConfiguration
-    static class KafkaTestConsumerConfiguration {
+    @Test
+    void shouldLoginUser() throws NoSuchAlgorithmException {
+        // given
+        var mail = "test@example.com";
+        var password = "password";
+        userFacade.register(mail, password);
 
-        @Bean
-        public TestKafkaConsumer<UserLifecycleEvent> testUserRegisteredEventConsumer() {
-            return new TestKafkaConsumer<>();
-        }
+        // when
+        var response = userFacade.login(mail, password);
 
-        @KafkaListener(
-                topics = "${topic.user.lifecycle}",
-                groupId = "test-user-registered-event-consumer-group"
-        )
-        public void listen(ConsumerRecord<String, UserLifecycleEvent> record) {
-            testUserRegisteredEventConsumer().handle(record);
-        }
+        // then
+        assertSoftly(s -> {
+            s.assertThat(response.accessToken()).isNotEmpty();
+            s.assertThat(response.refreshToken()).isNotEmpty();
+        });
+    }
+
+    @Test
+    void shouldNotLoginUserWhenItWasNotRegistered() {
+        // when then
+        assertThatThrownBy(() -> userFacade.login("test@example.com", "password"))
+                .isInstanceOf(BadCredentialsException.class)
+                .hasMessage("Bad credentials");
     }
 }

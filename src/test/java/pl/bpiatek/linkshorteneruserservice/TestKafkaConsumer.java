@@ -1,4 +1,4 @@
-package pl.bpiatek.linkshorteneruserservice.user;
+package pl.bpiatek.linkshorteneruserservice;
 
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.slf4j.Logger;
@@ -11,7 +11,7 @@ import java.util.concurrent.TimeUnit;
 
 @Component
 @ActiveProfiles("test")
-class TestKafkaConsumer<T> {
+public class TestKafkaConsumer<T> {
 
     private static final Logger log = LoggerFactory.getLogger(TestKafkaConsumer.class);
 
@@ -26,7 +26,7 @@ class TestKafkaConsumer<T> {
 
     public ConsumerRecord<String, T> awaitRecord(long timeout, TimeUnit unit) throws InterruptedException {
         if (!latch.await(timeout, unit)) {
-            throw new IllegalStateException("No user registered event message received in the allotted time");
+            throw new IllegalStateException("No event received in the allotted time");
         }
         return payload;
     }
