@@ -66,15 +66,9 @@ class AuthController {
 
         try {
             emailFacade.verifyEmail(token);
-            return ResponseEntity
-                    .status(HttpStatus.FOUND)
-                    .location(URI.create("/")) //TODO later successful address
-                    .build();
+            return ResponseEntity.ok().build();
         } catch (InvalidTokenException | ExpiredTokenException e) {
-            return ResponseEntity
-                    .status(HttpStatus.FOUND)
-                    .location(URI.create("/")) //TODO later failure address
-                    .build();
+            return ResponseEntity.badRequest().build();
         }
     }
 
