@@ -10,7 +10,7 @@ import static java.time.temporal.ChronoUnit.MINUTES;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
-class JdbcPasswordResetTokenRepositoryTest extends IntegrationTest {
+class JdbcPasswordResetTokenRepositoryIT extends IntegrationTest {
 
     @Autowired
     JdbcPasswordResetTokenRepository repository;

@@ -27,8 +27,7 @@ class JdbcUserRepositoryIT extends IntegrationTest {
                 "hashed_password_123",
                 List.of("ROLE_USER"),
                 false,
-                Instant.now()
-        );
+                Instant.now());
 
         // when
         userRepository.save(newUser);

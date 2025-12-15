@@ -66,6 +66,23 @@ class GlobalExceptionHandler {
         return new ResponseEntity<>(apiError, CONFLICT);
     }
 
+    @ExceptionHandler({InvalidTokenException.class, ExpiredTokenException.class, InvalidRefreshTokenException.class})
+    public ResponseEntity<ApiError> handleInvalidToken(
+            InvalidTokenException ex,
+            HttpServletRequest request) {
+        log.error("Invalid token on request [{}]: {}", request.getRequestURI(), ex.getMessage(), ex);
+        var apiError = new ApiError(
+                "/errors/invalid-token",
+                "Invalid Token",
+                BAD_REQUEST.value(),
+                ex.getMessage(),
+                request.getRequestURI(),
+                null
+        );
+
+        return new ResponseEntity<>(apiError, BAD_REQUEST);
+    }
+
     @ExceptionHandler(HttpMediaTypeNotSupportedException.class)
     public ResponseEntity<ApiError> handleUnsupportedMediaType(
             HttpMediaTypeNotSupportedException ex,

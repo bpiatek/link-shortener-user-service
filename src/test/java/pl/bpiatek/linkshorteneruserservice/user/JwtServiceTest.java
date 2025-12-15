@@ -38,6 +38,9 @@ class JwtServiceTest {
     @Mock
     private JwtKeyProvider jwtKeyProvider;
 
+    @Mock
+    private RefreshTokenService refreshTokenService;
+
     private JwtService jwtService;
     private PublicKey publicKey;
 
@@ -64,7 +67,8 @@ class JwtServiceTest {
                 REFRESH_TOKEN_EXPIRATION_MS,
                 FIXED_CLOCK,
                 userRepository,
-                jwtKeyProvider
+                jwtKeyProvider,
+                refreshTokenService
         );
 
         testUser = new User(123L, "test@example.com", "password", List.of("ROLE_USER"), true, NOW);

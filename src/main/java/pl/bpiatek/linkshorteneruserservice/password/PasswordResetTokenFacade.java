@@ -33,6 +33,7 @@ public class PasswordResetTokenFacade {
 
     @Transactional
     public void requestPasswordReset(String email) {
+        log.info("Password reset requested for email: {}", email);
         var userOptional = userFacade.findByEmail(email);
         if (userOptional.isEmpty()) {
             log.info("Reset requested for unknown email: {}", email);
@@ -49,6 +50,7 @@ public class PasswordResetTokenFacade {
 
     @Transactional
     public void resetPassword(String token, String newPassword) {
+        log.info("Resetting password for token: {}", token);
         var userId = passwordResetTokenService.validateAndConsumeToken(token);
         var user = userFacade.findById(userId.toString());
         if (user.isEmpty()) {

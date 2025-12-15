@@ -36,9 +36,28 @@ class UserConfig {
     }
 
     @Bean
-    UserFacade userFacade(RegistrationService registrationService, LoginService loginService,
-                          JwtKeyProvider jwtKeyProvider, UserRepository userRepository) {
-        return new UserFacade(registrationService, loginService, jwtKeyProvider, userRepository);
+    UserFacade userFacade(RegistrationService registrationService,
+                          LoginService loginService,
+                          JwtKeyProvider jwtKeyProvider,
+                          UserRepository userRepository,
+                          JwtService jwtService,
+                          RefreshTokenService refreshTokenService) {
+        return new UserFacade(registrationService, loginService, jwtKeyProvider, userRepository, jwtService, refreshTokenService);
+    }
+
+    @Bean
+    RefreshTokenStore refreshTokenStore(RefreshTokenRepository refreshTokenRepository) {
+        return new RefreshTokenStore(refreshTokenRepository);
+    }
+
+    @Bean
+    RefreshTokenService refreshTokenService(RefreshTokenStore refreshTokenStore, Clock clock) {
+        return new RefreshTokenService(refreshTokenStore, clock);
+    }
+
+    @Bean
+    RefreshTokenRepository refreshTokenRepository(NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
+        return new JdbcRefreshTokenRepository(namedParameterJdbcTemplate);
     }
 
     @Bean
@@ -59,8 +78,9 @@ class UserConfig {
                           @Value("${app.jwt.refresh-token.expiration}") long refreshTokenExpiration,
                           Clock clock,
                           UserRepository userRepository,
-                          JwtKeyProvider jwtKeyProvider) {
-        return new JwtService(accessTokenExpiration, refreshTokenExpiration, clock, userRepository, jwtKeyProvider);
+                          JwtKeyProvider jwtKeyProvider,
+                          RefreshTokenService refreshTokenService) {
+        return new JwtService(accessTokenExpiration, refreshTokenExpiration, clock, userRepository, jwtKeyProvider, refreshTokenService);
     }
 
     @Bean

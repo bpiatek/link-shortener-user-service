@@ -10,7 +10,7 @@ import static java.time.temporal.ChronoUnit.HOURS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
-class JdbcEmailVerificationRepositoryTest extends IntegrationTest {
+class JdbcEmailVerificationRepositoryIT extends IntegrationTest {
 
     @Autowired
     private JdbcEmailVerificationRepository repository;

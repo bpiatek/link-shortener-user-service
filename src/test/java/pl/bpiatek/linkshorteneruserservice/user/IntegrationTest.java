@@ -90,7 +90,9 @@ public abstract class IntegrationTest {
         jdbcTemplate.update("DELETE FROM user_roles");
         jdbcTemplate.update("DELETE FROM email_verifications");
         jdbcTemplate.update("DELETE FROM password_reset_tokens");
+        jdbcTemplate.update("DELETE FROM refresh_tokens");
         jdbcTemplate.update("DELETE FROM users");
+
         mutableClock.setInstant(DEFAULT_NOW);
 
         if (testUserLifecycleEventConsumer != null) {

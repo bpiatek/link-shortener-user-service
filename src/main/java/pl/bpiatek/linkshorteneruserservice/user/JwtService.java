@@ -15,14 +15,16 @@ class JwtService {
     private final Clock clock;
     private final UserRepository userRepository;
     private final JwtKeyProvider jwtKeyProvider;
+    private final  RefreshTokenService refreshTokenService;
 
     public JwtService(long accessTokenExpiration, long refreshTokenExpiration, Clock clock,
-                      UserRepository userRepository, JwtKeyProvider jwtKeyProvider) {
+                      UserRepository userRepository, JwtKeyProvider jwtKeyProvider, RefreshTokenService refreshTokenService) {
         this.accessTokenExpiration = accessTokenExpiration;
         this.refreshTokenExpiration = refreshTokenExpiration;
         this.clock = clock;
         this.userRepository = userRepository;
         this.jwtKeyProvider = jwtKeyProvider;
+        this.refreshTokenService = refreshTokenService;
     }
 
     LoginResponse generateTokens(Authentication authentication) {
@@ -31,8 +33,15 @@ class JwtService {
         var user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found after authentication: " + email));
 
+        return generateTokensForUser(user);
+    }
+
+    LoginResponse generateTokensForUser(User user) {
         var accessToken = generateAccessToken(user);
         var refreshToken = generateRefreshToken(user);
+
+        var refreshTokenExpiresAt = clock.instant().plusMillis(refreshTokenExpiration);
+        refreshTokenService.saveRefreshToken(user.id(), refreshToken, refreshTokenExpiresAt);
 
         return new LoginResponse(accessToken, refreshToken);
     }
