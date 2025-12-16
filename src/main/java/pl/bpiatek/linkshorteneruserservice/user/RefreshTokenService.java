@@ -45,6 +45,14 @@ class RefreshTokenService {
     }
 
     @Transactional
+    public void revokeToken(String rawRefreshToken) {
+        var hash = hashToken(rawRefreshToken);
+
+        refreshTokenStore.findByTokenHash(hash)
+                .ifPresent(token -> refreshTokenStore.deleteById(token.id()));
+    }
+
+    @Transactional
     public void revokeAllTokensForUser(long userId) {
         refreshTokenStore.deleteAllByUserId(userId);
     }

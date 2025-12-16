@@ -28,6 +28,10 @@ class UserDetailsServiceImpl implements UserDetailsService {
                     return new User(
                             dbUser.email(),
                             dbUser.passwordHash(),
+                            dbUser.isEmailVerified(),
+                            true,
+                            true,
+                            true,
                             authorities
                     );
                 })

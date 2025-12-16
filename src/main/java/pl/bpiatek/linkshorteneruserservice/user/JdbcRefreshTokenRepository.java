@@ -53,7 +53,6 @@ class JdbcRefreshTokenRepository implements RefreshTokenRepository {
         jdbcTemplate.update(sql, new MapSqlParameterSource("id", id));
     }
 
-    //TODO implement logout from all
     @Override
     public void deleteByUserId(Long userId) {
         var sql = "DELETE FROM refresh_tokens WHERE user_id = :userId";

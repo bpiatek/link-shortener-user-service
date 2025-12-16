@@ -3,7 +3,9 @@ package pl.bpiatek.linkshorteneruserservice.exception;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -14,6 +16,7 @@ import java.util.stream.Collectors;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.CONFLICT;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
+import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 
 @RestControllerAdvice
 class GlobalExceptionHandler {
@@ -99,6 +102,25 @@ class GlobalExceptionHandler {
         );
 
         return  new ResponseEntity<>(apiError, BAD_REQUEST);
+    }
+
+    @ExceptionHandler(DisabledException.class)
+    public ResponseEntity<ApiError> handleDisabledException(
+            DisabledException ex,
+            HttpServletRequest request) {
+
+        log.warn("Login failed: Account not verified for request [{}]: {}", request.getRequestURI(), ex.getMessage());
+
+        var apiError = new ApiError(
+                "/errors/account-disabled",
+                "Account Not Verified",
+                UNAUTHORIZED.value(),
+                "Your email address has not been verified yet. Please check your inbox.",
+                request.getRequestURI(),
+                null
+        );
+
+        return new ResponseEntity<>(apiError, UNAUTHORIZED);
     }
 
     @ExceptionHandler(Exception.class)

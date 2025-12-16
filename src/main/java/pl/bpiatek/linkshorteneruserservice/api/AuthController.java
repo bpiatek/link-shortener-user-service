@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import pl.bpiatek.linkshorteneruserservice.api.dto.ForgotPasswordRequest;
 import pl.bpiatek.linkshorteneruserservice.api.dto.LoginRequest;
 import pl.bpiatek.linkshorteneruserservice.api.dto.LoginResponse;
+import pl.bpiatek.linkshorteneruserservice.api.dto.LogoutRequest;
 import pl.bpiatek.linkshorteneruserservice.api.dto.RefreshTokenRequest;
 import pl.bpiatek.linkshorteneruserservice.api.dto.RegisterRequest;
 import pl.bpiatek.linkshorteneruserservice.api.dto.ResetPasswordRequest;
@@ -86,6 +87,12 @@ class AuthController {
     ResponseEntity<LoginResponse> refresh(@Valid @RequestBody RefreshTokenRequest request) {
         var response = userFacade.refresh(request.refreshToken());
         return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/logout")
+    ResponseEntity<Void> logout(@Valid @RequestBody LogoutRequest request) {
+        userFacade.logout(request.refreshToken());
+        return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/logout-everywhere")

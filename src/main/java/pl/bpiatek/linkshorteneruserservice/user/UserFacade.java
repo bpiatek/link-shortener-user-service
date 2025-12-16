@@ -1,5 +1,6 @@
 package pl.bpiatek.linkshorteneruserservice.user;
 
+import jakarta.validation.constraints.NotBlank;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -86,5 +87,9 @@ public class UserFacade {
         var userId = Long.parseLong(userIdString);
 
         refreshTokenService.revokeAllTokensForUser(userId);
+    }
+
+    public void logout(String refreshToken) {
+        refreshTokenService.revokeToken(refreshToken);
     }
 }
