@@ -90,6 +90,7 @@ public class UserFacade {
     }
 
     public void logout(String refreshToken) {
+        log.info("Logging out user with refresh token: {}", refreshToken);
         refreshTokenService.revokeToken(refreshToken);
     }
 }

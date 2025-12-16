@@ -1,5 +1,7 @@
 package pl.bpiatek.linkshorteneruserservice.user;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.transaction.annotation.Transactional;
 import pl.bpiatek.linkshorteneruserservice.exception.InvalidRefreshTokenException;
 
@@ -9,9 +11,11 @@ import java.security.NoSuchAlgorithmException;
 import java.time.Clock;
 import java.time.Instant;
 import java.util.HexFormat;
+import java.util.Optional;
 
 class RefreshTokenService {
 
+    private static final Logger log = LoggerFactory.getLogger(RefreshTokenService.class);
     private final RefreshTokenStore refreshTokenStore;
     private final Clock clock;
 
@@ -48,7 +52,12 @@ class RefreshTokenService {
     public void revokeToken(String rawRefreshToken) {
         var hash = hashToken(rawRefreshToken);
 
-        refreshTokenStore.findByTokenHash(hash)
+        var optionalRefreshToken = refreshTokenStore.findByTokenHash(hash);
+        if (optionalRefreshToken.isEmpty()) {
+            RefreshTokenService.log.info("Refresh token: {} not found in database by tokenHash: {}", rawRefreshToken, hash);
+        }
+
+        optionalRefreshToken
                 .ifPresent(token -> refreshTokenStore.deleteById(token.id()));
     }
 
