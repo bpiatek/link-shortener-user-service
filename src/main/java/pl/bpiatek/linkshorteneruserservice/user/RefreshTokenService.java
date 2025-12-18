@@ -28,7 +28,7 @@ class RefreshTokenService {
     void saveRefreshToken(long userId, String rawToken, Instant expiresAt) {
         log.info("Saving refresh token for user with ID: {}, rawToken: {}", userId, rawToken);
         var hash = hashToken(rawToken);
-        log.info("Refreshing user with refresh tokenHash: {}", hash);
+        log.info("Saving refresh tokenHash for user with ID: {}, tokenHash: {}", userId, hash);
         var token = new RefreshToken(null, userId, hash, expiresAt, clock.instant());
         refreshTokenStore.save(token);
     }
