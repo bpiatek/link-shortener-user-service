@@ -26,7 +26,9 @@ class RefreshTokenService {
 
     @Transactional
     void saveRefreshToken(long userId, String rawToken, Instant expiresAt) {
+        log.info("Saving refresh token for user with ID: {}, rawToken: {}", userId, rawToken);
         var hash = hashToken(rawToken);
+        log.info("Refreshing user with refresh tokenHash: {}", hash);
         var token = new RefreshToken(null, userId, hash, expiresAt, clock.instant());
         refreshTokenStore.save(token);
     }
@@ -34,7 +36,7 @@ class RefreshTokenService {
     @Transactional
     long validateAndRotate(String rawToken) {
         var hash = hashToken(rawToken);
-
+        log.info("Refreshing user with refresh tokenHash: {}", hash);
         var tokenEntity = refreshTokenStore.findByTokenHash(hash)
                 .orElseThrow(() -> new InvalidRefreshTokenException("Refresh token not found in database"));
 
@@ -54,7 +56,7 @@ class RefreshTokenService {
 
         var optionalRefreshToken = refreshTokenStore.findByTokenHash(hash);
         if (optionalRefreshToken.isEmpty()) {
-            RefreshTokenService.log.info("Refresh token: {} not found in database by tokenHash: {}", rawRefreshToken, hash);
+            log.info("Refresh token: {} not found in database by tokenHash: {}", rawRefreshToken, hash);
         }
 
         optionalRefreshToken

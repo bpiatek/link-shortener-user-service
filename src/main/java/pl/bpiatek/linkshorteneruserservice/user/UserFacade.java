@@ -71,6 +71,7 @@ public class UserFacade {
 
     @Transactional
     public LoginResponse refresh(String rawRefreshToken) {
+        log.info("Refreshing user with refresh token: {}", rawRefreshToken);
         long userId = refreshTokenService.validateAndRotate(rawRefreshToken);
 
         var user = userRepository.findById(String.valueOf(userId))
