@@ -1,7 +1,6 @@
 package pl.bpiatek.linkshorteneruserservice.user;
 
 
-import org.junit.Ignore;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +14,7 @@ import java.util.concurrent.TimeUnit;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
+import static pl.bpiatek.contracts.user.UserLifecycleEventProto.UserLifecycleEvent.EventPayloadCase.USER_REGISTERED;
 
 class UserFacadeRegisterUserIT extends IntegrationTest {
 
@@ -63,7 +63,7 @@ class UserFacadeRegisterUserIT extends IntegrationTest {
 
         assertSoftly(s -> {
             var envelope = record.value();
-            s.assertThat(envelope.getEventPayloadCase()).isEqualTo(UserLifecycleEvent.EventPayloadCase.USER_REGISTERED);
+            s.assertThat(envelope.getEventPayloadCase()).isEqualTo(USER_REGISTERED);
 
             var message = envelope.getUserRegistered();
             s.assertThat(message.getUserId()).isEqualTo(user.getId().toString());
